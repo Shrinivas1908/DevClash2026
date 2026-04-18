@@ -8,7 +8,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 export function useJobRealtime(jobId: string) {
   const updateJob = useStore((s) => s.updateJob);
   const setIsLiveConnected = useStore((s) => s.setIsLiveConnected);
-  
+
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -56,10 +56,10 @@ export function useJobRealtime(jobId: string) {
               data.stage > stageNum
                 ? 'complete'
                 : data.stage === stageNum
-                ? data.status === 'error'
-                  ? 'failed'
-                  : 'running'
-                : 'waiting',
+                  ? data.status === 'error'
+                    ? 'failed'
+                    : 'running'
+                  : 'waiting',
             started_at: null,
             completed_at: null,
           }));

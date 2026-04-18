@@ -6,7 +6,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import supabase from '../services/supabase.js';
 import jobEvents from '../services/events.js';
-import * as gemini from '../services/geminiService.js';
+import * as groq from '../services/groqService.js';
 import logger from '../utils/logger.js';
 import path from 'path';
 
@@ -161,10 +161,12 @@ router.get('/repo/:id/commits', async (req, res) => {
 });
 
 router.post('/repo/:id/query', async (req, res) => {
+  const { id: repoId } = req.params;
   const { question } = req.body;
-  const repoId = req.params.id;
 
-  if (!question) return res.status(400).json({ error: 'Question is required' });
+  if (!question) {
+    return res.status(400).json({ error: 'Question is required' });
+  }
 
   try {
     const { data: repo, error: repoError } = await supabase
@@ -176,7 +178,7 @@ router.post('/repo/:id/query', async (req, res) => {
     if (repoError || !repo) return res.status(404).json({ error: 'Repository not found' });
 
     const context = repo.ai_context?.summary || "No architectural context available.";
-    const result = await gemini.queryRepository(question, context);
+    const result = await groq.queryRepository(question, context);
 
     // 3. Fetch latest commits for identified issues/keywords
     let relatedCommits = [];
@@ -215,6 +217,42 @@ router.post('/repo/:id/query', async (req, res) => {
   } catch (err) {
     logger.error('AI query failure:', err);
     return res.status(500).json({ error: 'Internal AI query failure' });
+  }
+});
+
+// New endpoint for file-specific AI queries
+router.post('/repo/:id/file-query', async (req, res) => {
+  const { id: repoId } = req.params;
+  const { filePath } = req.body;
+
+  if (!filePath) {
+    return res.status(400).json({ error: 'File path is required' });
+  }
+
+  try {
+    const { data: repo, error: repoError } = await supabase
+      .from('repos')
+      .select('ai_context, repo_name, repo_url')
+      .eq('id', repoId)
+      .single();
+
+    if (repoError || !repo) return res.status(404).json({ error: 'Repository not found' });
+
+    const context = repo.ai_context?.summary || "No architectural context available.";
+    
+    // Ask AI about the specific file
+    const question = `What is the purpose and architectural role of the file: ${filePath}? Explain its function in the overall architecture.`;
+    
+    const result = await groq.queryRepository(question, context);
+
+    return res.json({
+      explanation: result.explanation,
+      keywords: result.keywords
+    });
+
+  } catch (err) {
+    logger.error('File AI query failure:', err);
+    return res.status(500).json({ error: 'Internal file AI query failure' });
   }
 });
 

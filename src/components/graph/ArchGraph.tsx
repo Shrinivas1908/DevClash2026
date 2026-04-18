@@ -7,6 +7,7 @@ import {
   type NodeTypes,
   type EdgeTypes,
   type Node,
+  type Edge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useStore } from '@/store';

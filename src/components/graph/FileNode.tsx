@@ -23,11 +23,11 @@ export const FileNode = memo(({ data, selected }: NodeProps) => {
   const fileData = data as unknown as FileNodeData;
   const compactMode = useStore((s) => s.compactMode);
 
-  const importanceColor = fileData.composite_importance >= 20 
-    ? 'text-accent-blue' 
-    : fileData.is_entry_point 
-    ? 'text-accent-green' 
-    : 'text-text-muted';
+  const importanceColor = fileData.composite_importance >= 20
+    ? 'text-accent-blue'
+    : fileData.is_entry_point
+      ? 'text-accent-green'
+      : 'text-text-muted';
 
   const tooltipContent = (
     <div className="space-y-1.5 p-1">
@@ -49,8 +49,8 @@ export const FileNode = memo(({ data, selected }: NodeProps) => {
         className={cn(
           'relative rounded-xl border transition-all duration-300 group',
           'bg-bg-surface/80 backdrop-blur-md shadow-lg',
-          selected 
-            ? 'border-accent-blue ring-4 ring-accent-blue/10 scale-105 shadow-glow z-50' 
+          selected
+            ? 'border-accent-blue ring-4 ring-accent-blue/10 scale-105 shadow-glow z-50'
             : 'border-border/50 hover:border-accent-blue/40 hover:shadow-xl hover:-translate-y-0.5',
           compactMode ? 'w-32 h-12 px-3 py-2' : 'w-48 h-20 px-4 py-3',
         )}
@@ -60,10 +60,10 @@ export const FileNode = memo(({ data, selected }: NodeProps) => {
           <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-blue/20 to-accent-purple/20 rounded-xl blur opacity-50 group-hover:opacity-100 transition-opacity" />
         )}
 
-        <Handle 
-          type="target" 
-          position={Position.Top} 
-          className="!w-2.5 !h-2.5 !bg-bg-base !border-2 !border-accent-blue/30 !-top-1.5" 
+        <Handle
+          type="target"
+          position={Position.Top}
+          className="!w-2.5 !h-2.5 !bg-bg-base !border-2 !border-accent-blue/30 !-top-1.5"
         />
 
         <div className="flex flex-col h-full relative z-10">
@@ -78,7 +78,7 @@ export const FileNode = memo(({ data, selected }: NodeProps) => {
               <div className="w-2 h-2 rounded-full bg-accent-green shadow-[0_0_8px_rgba(74,222,128,0.5)] flex-shrink-0 mt-1" title="Entry Point" />
             )}
           </div>
-          
+
           {!compactMode && (
             <>
               <p className="text-[10px] text-text-muted font-mono truncate mt-0.5 opacity-70">
@@ -96,10 +96,10 @@ export const FileNode = memo(({ data, selected }: NodeProps) => {
           )}
         </div>
 
-        <Handle 
-          type="source" 
-          position={Position.Bottom} 
-          className="!w-2.5 !h-2.5 !bg-bg-base !border-2 !border-accent-blue/30 !-bottom-1.5" 
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          className="!w-2.5 !h-2.5 !bg-bg-base !border-2 !border-accent-blue/30 !-bottom-1.5"
         />
       </div>
     </Tooltip>

@@ -3,24 +3,34 @@
  */
 
 import dotenv from 'dotenv';
-dotenv.config();
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env from parent directory
+const envPath = path.join(__dirname, '../../.env');
+logger.info(`Loading .env from: ${envPath}`);
+const envResult = dotenv.config({ path: envPath });
+if (envResult.error) {
+  logger.error('Error loading .env:', envResult.error);
+} else {
+  logger.info('.env loaded successfully');
+  logger.info(`GROQ_API_KEY in process.env: ${process.env.GROQ_API_KEY ? 'YES' : 'NO'}`);
+}
 
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { fileURLToPath } from 'url';
 
 import apiRouter from './routes/api.js';
 import filesRouter from './routes/files.js';
 import { startJobManager } from './worker/jobManager.js';
 import logger from './utils/logger.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3001;

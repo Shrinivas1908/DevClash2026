@@ -63,7 +63,8 @@ export function getImportanceBadgeClass(score: number): string {
   return 'bg-accent-green/20 text-accent-green border-accent-green/30';
 }
 
-export function extractRepoName(url: string): string {
+export function extractRepoName(url: string | undefined): string {
+  if (!url) return 'Unknown Repository';
   const match = url.match(/github\.com\/([^/]+\/[^/]+)/);
   return match ? match[1] : url;
 }

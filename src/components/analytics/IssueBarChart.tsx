@@ -23,7 +23,7 @@ export function IssueBarChart({ data }: { data: ChartData[] }) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       className="h-[400px] w-full bg-bg-surface border border-border/50 rounded-2xl p-6 shadow-2xl relative overflow-hidden group"
@@ -48,38 +48,38 @@ export function IssueBarChart({ data }: { data: ChartData[] }) {
           </span>
         </div>
       </div>
-      
+
       <div className="h-[280px] w-full relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart 
-            data={data} 
+          <BarChart
+            data={data}
             margin={{ top: 20, right: 10, left: -25, bottom: 40 }}
           >
             <defs>
               <linearGradient id="barGradientBlue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                <stop offset="100%" stopColor="#2563EB" stopOpacity={0.3}/>
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#2563EB" stopOpacity={0.3} />
               </linearGradient>
               <linearGradient id="barGradientPurple" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.8}/>
-                <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.3}/>
+                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.8} />
+                <stop offset="100%" stopColor="#7C3AED" stopOpacity={0.3} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
-            <XAxis 
-              dataKey="issue" 
+            <XAxis
+              dataKey="issue"
               axisLine={false}
               tickLine={false}
               interval={0}
               tick={({ x, y, payload }) => (
                 <g transform={`translate(${x},${y})`}>
-                  <text 
-                    x={0} 
-                    y={0} 
-                    dy={16} 
-                    textAnchor="end" 
-                    fill="rgba(255,255,255,0.4)" 
-                    fontSize={9} 
+                  <text
+                    x={0}
+                    y={0}
+                    dy={16}
+                    textAnchor="end"
+                    fill="rgba(255,255,255,0.4)"
+                    fontSize={9}
                     fontWeight={700}
                     transform="rotate(-35)"
                     className="font-mono"
@@ -89,16 +89,16 @@ export function IssueBarChart({ data }: { data: ChartData[] }) {
                 </g>
               )}
             />
-            <YAxis 
+            <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9, fontWeight: 700 }}
             />
             <Tooltip
               cursor={{ fill: 'rgba(255,255,255,0.03)' }}
-              contentStyle={{ 
-                backgroundColor: 'rgba(23, 23, 33, 0.95)', 
-                border: '1px solid rgba(255,255,255,0.1)', 
+              contentStyle={{
+                backgroundColor: 'rgba(23, 23, 33, 0.95)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: '12px',
                 fontSize: '11px',
                 boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
@@ -109,27 +109,27 @@ export function IssueBarChart({ data }: { data: ChartData[] }) {
               labelStyle={{ color: '#3B82F6', marginBottom: '6px', fontWeight: '900', letterSpacing: '0.05em' }}
               formatter={(value: number) => [`${value} Activity Units`, 'Density']}
             />
-            <Bar 
-              dataKey="count" 
-              radius={[6, 6, 0, 0]} 
+            <Bar
+              dataKey="count"
+              radius={[6, 6, 0, 0]}
               barSize={24}
               animationDuration={1500}
               animationBegin={200}
             >
               {data.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={index % 2 === 0 ? 'url(#barGradientBlue)' : 'url(#barGradientPurple)'} 
+                <Cell
+                  key={`cell-${index}`}
+                  fill={index % 2 === 0 ? 'url(#barGradientBlue)' : 'url(#barGradientPurple)'}
                   stroke={index % 2 === 0 ? '#3B82F6' : '#8B5CF6'}
                   strokeWidth={1}
                   strokeOpacity={0.3}
                 />
               ))}
-              <LabelList 
-                dataKey="count" 
-                position="top" 
-                fill="rgba(255,255,255,0.4)" 
-                fontSize={9} 
+              <LabelList
+                dataKey="count"
+                position="top"
+                fill="rgba(255,255,255,0.4)"
+                fontSize={9}
                 fontWeight="bold"
                 offset={10}
               />

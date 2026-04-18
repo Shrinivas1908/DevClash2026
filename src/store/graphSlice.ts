@@ -24,13 +24,19 @@ export interface GraphSlice {
   setCompactMode: (compact: boolean) => void;
 }
 
-const NODE_WIDTH = 180;
-const NODE_HEIGHT = 64;
+const NODE_WIDTH = 200;
+const NODE_HEIGHT = 60;
 
 function applyDagreLayout(nodes: Node[], edges: Edge[], direction: 'TB' | 'LR'): Node[] {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: direction, ranksep: 80, nodesep: 40 });
+  g.setGraph({ 
+    rankdir: direction, 
+    ranksep: 150,  // Increased vertical spacing
+    nodesep: 100,  // Increased horizontal spacing
+    marginx: 50,    // Add margin
+    marginy: 50     // Add margin
+  });
 
   nodes.forEach((n) => g.setNode(n.id, { width: NODE_WIDTH, height: NODE_HEIGHT }));
   edges.forEach((e) => g.setEdge(e.source, e.target));
@@ -48,7 +54,10 @@ function fileNodeToFlowNode(f: FileNodeData): Node {
     id: f.id,
     type: 'fileNode',
     position: { x: 0, y: 0 },
-    data: f as unknown as Record<string, unknown>,
+    data: {
+      ...f,
+      realId: (f as any).realId || f.id, // Ensure realId is included for file summary lookup
+    } as unknown as Record<string, unknown>,
   };
 }
 

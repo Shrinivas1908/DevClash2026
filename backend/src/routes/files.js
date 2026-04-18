@@ -4,7 +4,7 @@
 
 import express from 'express';
 import supabase from '../services/supabase.js';
-import * as gemini from '../services/geminiService.js';
+import * as groq from '../services/groqService.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -33,6 +33,8 @@ async function fetchGithubRawContent(repoUrl, commitSha, filePath) {
 router.get('/:id/summary', async (req, res) => {
   const fileId = req.params.id;
 
+  logger.info(`File summary requested for ID: ${fileId}`);
+
   // Set headers for SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -52,10 +54,12 @@ router.get('/:id/summary', async (req, res) => {
       .single();
 
     if (fileError || !file) {
+      logger.error(`File not found for ID ${fileId}: ${fileError?.message}`);
       res.write(`data: ${JSON.stringify('File not found.')}\n\n`);
       return sendEnd();
     }
 
+    logger.info(`File found: ${file.file_path}, has cached summary: ${!!file.summary}`);
     let summaryText = file.summary;
 
     if (!summaryText) {
@@ -77,7 +81,7 @@ router.get('/:id/summary', async (req, res) => {
         ? fileContent.substring(0, 8000) // limit size
         : "[Content unavailable - file too large or not found on GitHub]";
 
-      const result = await gemini.generateFileSummary({
+      const result = await groq.generateFileSummary({
         file_path: file.file_path,
         content: contentToAnalyze 
       }, repoContext);

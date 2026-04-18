@@ -3,12 +3,12 @@ import { X, GitCommit, ArrowDownToLine, ArrowUpFromLine, Sparkles, ExternalLink,
 import { useStore } from '@/store';
 import { Badge, importanceBadge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
-import { useFileDetail } from '@/hooks/useFileDetail';
 import type { FileNodeData } from '@/types/graph';
 import { truncateSha, getLanguageColor } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { IssueStats } from '@/components/analytics/IssueStats';
+import { apiPost } from '@/lib/api';
 
 function SkeletonLine({ w }: { w: string }) {
   return <div className={cn('skeleton h-3 rounded', w)} />;
@@ -43,11 +43,37 @@ export function RightPanel() {
   const relatedCommits = useStore((s) => s.relatedCommits);
 
   const [activeTab, setActiveTab] = useState<Tab>('imports');
+  const [summary, setSummary] = useState('');
+  const [status, setStatus] = useState<'idle' | 'streaming' | 'complete' | 'error' | 'unavailable'>('idle');
 
   const selectedNode = allNodes.find((n) => n.id === selectedNodeId);
   const fileData = selectedNode?.data as unknown as FileNodeData | undefined;
 
-  const { summary, status } = useFileDetail(fileData?.realId ?? null);
+  // Fetch AI summary for selected file
+  useEffect(() => {
+    if (!selectedNodeId || !fileData || !repoId) {
+      setSummary('');
+      setStatus('idle');
+      return;
+    }
+
+    const fetchFileSummary = async () => {
+      try {
+        setStatus('streaming');
+        const response = await apiPost<{ explanation: string; keywords: string[] }>(`/api/repo/${repoId}/file-query`, {
+          filePath: fileData.path
+        });
+        setSummary(response.explanation || '');
+        setStatus('complete');
+      } catch (err) {
+        console.error('Failed to fetch file summary:', err);
+        setSummary('Unable to fetch file summary.');
+        setStatus('unavailable');
+      }
+    };
+
+    fetchFileSummary();
+  }, [selectedNodeId, fileData, repoId]);
 
 
   const imports = allEdges

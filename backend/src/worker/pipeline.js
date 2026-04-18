@@ -15,14 +15,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load env vars
-dotenv.config({ path: path.resolve(__dirname, '../../..', '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 import supabase from '../services/supabase.js';
 import { runIngestion } from './stages/1_ingestion.js';
 import { runStaticAnalysis } from './stages/2_staticAnalysis.js';
 import { runCommitAnalysis, getAllBranches, tagFilesWithIssues } from './stages/3_commitAnalysis.js';
 import { computeOnboardingPath } from './stages/4_aiSummaries.js';
-import * as gemini from '../services/geminiService.js';
+import * as groq from '../services/groqService.js';
 import { cleanup } from '../utils/cleanup.js';
 import logger from '../utils/logger.js';
 
@@ -65,14 +65,99 @@ async function runPipeline() {
     // Cache check
     const { data: existingRepo } = await supabase
       .from('repos')
-      .select('id')
+      .select('id, graph_json, ai_context')
       .eq('repo_url', repoUrl)
       .eq('branch', currentBranch)
       .eq('commit_sha', commitSha)
       .maybeSingle();
 
     if (existingRepo) {
-      logger.info(`[Job ${jobId}] Cache HIT`);
+      logger.info(`[Job ${jobId}] Cache HIT - checking if graph has realId`);
+      
+      // Check if graph nodes have realId (for file summary lookups)
+      const graphHasRealId = existingRepo.graph_json?.nodes?.some((n) => n.realId);
+      logger.info(`[Job ${jobId}] Graph has realId: ${graphHasRealId}`);
+      
+      if (!graphHasRealId) {
+        logger.info(`[Job ${jobId}] Graph missing realId, updating with database IDs`);
+        
+        // Fetch files to get database IDs
+        const { data: files, error: filesError } = await supabase
+          .from('files')
+          .select('id, file_path')
+          .eq('repo_id', existingRepo.id);
+        
+        if (filesError) {
+          logger.error(`[Job ${jobId}] Error fetching files: ${filesError.message}`);
+        } else if (files && files.length > 0) {
+          logger.info(`[Job ${jobId}] Found ${files.length} files in database`);
+          
+          // Create path to database ID mapping
+          const pathToDbId = new Map();
+          files.forEach((fr) => pathToDbId.set(fr.file_path, fr.id));
+          
+          // Update graph nodes with database IDs
+          const updatedGraphNodes = existingRepo.graph_json.nodes.map((node) => ({
+            ...node,
+            realId: pathToDbId.get(node.path) || node.id,
+          }));
+          
+          const updatedGraphJson = {
+            ...existingRepo.graph_json,
+            nodes: updatedGraphNodes,
+          };
+          
+          logger.info(`[Job ${jobId}] Updating graph with realId for ${updatedGraphNodes.length} nodes`);
+          
+          const { error: updateError } = await supabase.from('repos').update({ 
+            graph_json: updatedGraphJson 
+          }).eq('id', existingRepo.id);
+          
+          if (updateError) {
+            logger.error(`[Job ${jobId}] Error updating graph: ${updateError.message}`);
+          } else {
+            logger.info(`[Job ${jobId}] Graph updated with realId successfully`);
+          }
+        } else {
+          logger.warn(`[Job ${jobId}] No files found in database for repo ${existingRepo.id}`);
+        }
+      }
+      
+      // Check if AI context exists
+      if (!existingRepo.ai_context || !existingRepo.ai_context.summary) {
+        logger.info(`[Job ${jobId}] AI context missing, running AI analysis with Groq`);
+        
+        const { data: files } = await supabase
+          .from('files')
+          .select('id, file_path')
+          .eq('repo_id', existingRepo.id);
+        
+        if (files && files.length > 0) {
+          await updateProgress(4, 65);
+          
+          const topFiles = files.slice(0, 10).map(f => ({ path: f.file_path }));
+          const entryPoints = [];
+          
+          logger.info(`[Job ${jobId}] Calling Groq generateRepoContext`);
+          const contextSummary = await groq.generateRepoContext(existingRepo, topFiles, entryPoints);
+          logger.info(`[Job ${jobId}] Groq response received`);
+          
+          await supabase.from('repos').update({
+            ai_context: {
+              ...contextSummary,
+              generated_at: new Date().toISOString(),
+              tokens: 200
+            }
+          }).eq('id', existingRepo.id);
+          
+          logger.info(`[Job ${jobId}] AI context saved to database`);
+        }
+        
+        await updateProgress(4, 100, 'done');
+      } else {
+        logger.info(`[Job ${jobId}] AI context exists, skipping AI analysis`);
+      }
+      
       await supabase.from('repos').update({ job_id: jobId }).eq('id', existingRepo.id);
       await updateProgress(4, 100, 'done');
       await cleanup(cloneDir);
@@ -95,24 +180,7 @@ async function runPipeline() {
 
     tagFilesWithIssues(analyzedFiles, issueToFiles);
 
-    // Save initial repo record
-    repoId = uuidv4();
-    const repoRecord = {
-      id: repoId,
-      job_id: jobId,
-      repo_url: repoUrl,
-      repo_name: repoName,
-      branch: currentBranch,
-      commit_sha: commitSha,
-      graph_json: graphJson,
-      file_tree: buildFileTree(analyzedFiles),
-      language_stats: languageStats,
-      total_files: files.length,
-      analyzed_files: analyzedFiles.length,
-    };
-    await supabase.from('repos').insert(repoRecord);
-
-    // Save files
+    // Save files first to get database IDs
     const fileRecords = analyzedFiles.map((f) => ({
       id: uuidv4(),
       repo_id: repoId,
@@ -132,6 +200,38 @@ async function runPipeline() {
       const { error } = await supabase.from('files').insert(fileRecords.slice(i, i + 500));
       if (error) throw new Error(`Failed to save files: ${error.message}`);
     }
+
+    // Create path to database ID mapping for graph nodes
+    const pathToDbId = new Map();
+    fileRecords.forEach((fr) => pathToDbId.set(fr.file_path, fr.id));
+
+    // Update graph nodes with database IDs
+    const updatedGraphNodes = graphJson.nodes.map((node) => ({
+      ...node,
+      realId: pathToDbId.get(node.path) || node.id,
+    }));
+
+    const updatedGraphJson = {
+      ...graphJson,
+      nodes: updatedGraphNodes,
+    };
+
+    // Save initial repo record with updated graph
+    repoId = uuidv4();
+    const repoRecord = {
+      id: repoId,
+      job_id: jobId,
+      repo_url: repoUrl,
+      repo_name: repoName,
+      branch: currentBranch,
+      commit_sha: commitSha,
+      graph_json: updatedGraphJson,
+      file_tree: buildFileTree(analyzedFiles),
+      language_stats: languageStats,
+      total_files: files.length,
+      analyzed_files: analyzedFiles.length,
+    };
+    await supabase.from('repos').insert(repoRecord);
 
     // Save commits
     const commitRecords = commits.map((c) => ({
@@ -159,12 +259,12 @@ async function runPipeline() {
       .slice(0, 10);
     const entryPoints = analyzedFiles.filter(f => f.is_entry_point).map(f => f.path);
 
-    const contextSummary = await gemini.generateRepoContext(repoRecord, topFiles, entryPoints);
+    const contextSummary = await groq.generateRepoContext(repoRecord, topFiles, entryPoints);
 
     // Save context to repo
     await supabase.from('repos').update({
       ai_context: {
-        summary: contextSummary,
+        ...contextSummary,
         generated_at: new Date().toISOString(),
         tokens: 200 // estimated
       }
@@ -176,7 +276,7 @@ async function runPipeline() {
       content: readFilePreview(f.absolutePath, 150)
     }));
 
-    const summariesMap = await gemini.generateFileSummariesBatch(filesToSummarize, contextSummary);
+    const summariesMap = await groq.generateFileSummariesBatch(filesToSummarize, contextSummary.summary || typeof contextSummary === 'string' ? contextSummary : '');
 
     // 3. Persist summaries and update progress incrementally
     let processed = 0;

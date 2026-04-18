@@ -29,11 +29,11 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
  * Returns a cleanup function to close the connection.
  */
 export function streamSummary(
-  sha: string,
+  id: string,
   onChunk: (text: string) => void,
   onError?: () => void,
 ): () => void {
-  const es = new EventSource(`${BASE()}/api/files/${sha}/summary`);
+  const es = new EventSource(`${BASE()}/api/files/${id}/summary`);
   es.onmessage = (e) => onChunk(e.data as string);
   es.onerror = () => {
     onError?.();
@@ -41,5 +41,6 @@ export function streamSummary(
   };
   return () => es.close();
 }
+
 
 export { ApiError };

@@ -8,7 +8,9 @@ export interface FileNodeData {
   composite_importance: number;
   is_entry_point: boolean;
   last_commit_sha: string;
+  realId?: string;
 }
+
 
 export interface DependencyEdgeData {
   source: string;

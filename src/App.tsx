@@ -14,7 +14,7 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <HashRouter>
+      <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/graph/:jobId" element={<GraphPage />} />

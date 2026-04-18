@@ -11,7 +11,7 @@ export function useJobSubmit() {
   const navigate = useNavigate();
   const { setJob, addToast } = useStore();
 
-  const submit = async (repoUrl: string) => {
+  const submit = async (repoUrl: string, taskDescription?: string) => {
     setLoading(true);
     setError(null);
 
@@ -29,7 +29,27 @@ export function useJobSubmit() {
 
     const attempt = async (): Promise<void> => {
       try {
-        const data = await apiPost<JobCreateResponse>('/api/jobs', { repo_url: repoUrl });
+        const data = await apiPost<JobCreateResponse>('/api/jobs', { 
+          repo_url: repoUrl,
+          task_description: taskDescription 
+        });
+
+        
+        // Initialize the job state locally so the GraphPage has something to start with
+        setJob({
+          id: data.jobId,
+          repo_url: repoUrl,
+          status: 'pending',
+          stages: [
+            { stage: 1, name: 'Repo Ingestion', status: 'waiting', started_at: null, completed_at: null },
+            { stage: 2, name: 'Static Analysis', status: 'waiting', started_at: null, completed_at: null },
+            { stage: 3, name: 'Commit Analysis', status: 'waiting', started_at: null, completed_at: null },
+            { stage: 4, name: 'AI Summaries', status: 'waiting', started_at: null, completed_at: null },
+          ],
+          graph_json: null,
+          created_at: new Date().toISOString(),
+        });
+
         navigate(`/graph/${data.jobId}`);
       } catch (err) {
         const e = err as Error;

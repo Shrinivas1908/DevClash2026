@@ -29,7 +29,7 @@ export function LandingPage() {
     setTouched(true);
     if (!isValid) return;
     setUserTask(task);
-    await submit(url);
+    await submit(url, task);
   };
 
   return (
@@ -66,7 +66,7 @@ export function LandingPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-text-primary tracking-tight">
-              Repository Architecture Navigator
+              RepoMap
             </h1>
           </div>
         </div>

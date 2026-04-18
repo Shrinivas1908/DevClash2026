@@ -83,7 +83,7 @@ export const MOCK_AI_SUMMARY = `This file serves as the centralized logging infr
 **Architectural Role:**
 High fan-in utility (9 importers) making this a critical cross-cutting concern. Changes to this file propagate across the entire codebase. Zero fan-out dependencies indicate a pure utility leaf node.`;
 
-export const IS_MOCK_MODE = true; // Hardcoded to true for zero-dependency operation
+export const IS_MOCK_MODE = false; // Set to true to use mock data without a backend
 
 // ─── AI & Task Demo Data ───────────────────────────────────────────────────
 

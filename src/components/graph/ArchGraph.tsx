@@ -25,6 +25,9 @@ export function ArchGraph() {
   const setSelectedNode = useStore((s) => s.setSelectedNode);
   const setRightPanelOpen = useStore((s) => s.setRightPanelOpen);
 
+  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+  const memoizedEdgeTypes = useMemo(() => edgeTypes, []);
+
   const onNodeClick = useCallback(
     (_evt: React.MouseEvent, node: Node) => {
       setSelectedNode(node.id);
@@ -51,22 +54,58 @@ export function ArchGraph() {
     [],
   );
 
+  const setEdges = useCallback((updater: (eds: Edge[]) => Edge[]) => {
+    useStore.setState((s) => ({ edges: updater(s.edges) }));
+  }, []);
+
+  const onNodeMouseEnter = useCallback((_evt: React.MouseEvent, node: Node) => {
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        animated: e.source === node.id || e.target === node.id,
+        style: {
+          ...e.style,
+          stroke: e.source === node.id || e.target === node.id ? '#4D8EF7' : '#1C2030',
+          strokeWidth: e.source === node.id || e.target === node.id ? 3 : 1,
+          opacity: e.source === node.id || e.target === node.id ? 1 : 0.1,
+        },
+      }))
+    );
+  }, [setEdges]);
+
+  const onNodeMouseLeave = useCallback(() => {
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        animated: false,
+        style: {
+          ...e.style,
+          stroke: '#2A2F42',
+          strokeWidth: 1.5,
+          opacity: 1,
+        },
+      }))
+    );
+  }, [setEdges]);
+
   return (
-    <div className="flex-1 h-full relative">
+    <div className="flex-1 h-full relative group">
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
+        nodeTypes={memoizedNodeTypes}
+        edgeTypes={memoizedEdgeTypes}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
         fitView
         fitViewOptions={{ padding: 0.15 }}
         proOptions={{ hideAttribution: false }}
         minZoom={0.05}
         maxZoom={3}
         defaultEdgeOptions={defaultEdgeOptions}
-        className="bg-bg-base"
+        className="bg-bg-base transition-opacity duration-300"
         deleteKeyCode={null}
         selectionKeyCode={null}
       >

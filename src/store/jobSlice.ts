@@ -14,7 +14,7 @@ export const createJobSlice: StateCreator<JobSlice> = (set) => ({
   setJob: (job) => set({ currentJob: job }),
   updateJob: (partial) =>
     set((state) => ({
-      currentJob: state.currentJob ? { ...state.currentJob, ...partial } : null,
+      currentJob: state.currentJob ? { ...state.currentJob, ...partial } : (partial as Job),
     })),
   clearJob: () =>
     set({

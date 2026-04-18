@@ -11,20 +11,24 @@ export function useJobRealtime(jobId: string) {
   const startPolling = () => {
     if (pollRef.current) return;
     
-    // In live mode, we poll the backend status
-    // In mock mode, we simulate progress via updateJob logic if needed
-    // But for the current implementation, we'll just poll the API
-    pollRef.current = setInterval(async () => {
+    const poll = async () => {
       try {
         const job = await apiGet<Job>(`/api/jobs/${jobId}`);
         updateJob(job);
         if (job.status === 'complete' || job.status === 'failed') {
-          if (pollRef.current) clearInterval(pollRef.current);
+          if (pollRef.current) {
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+          }
         }
-      } catch {
-        // silent — will retry
+      } catch (err) {
+        console.warn('[useJobRealtime] Poll failed:', err);
       }
-    }, 3000);
+    };
+
+    // Poll immediately on start
+    poll();
+    pollRef.current = setInterval(poll, 3000);
   };
 
   useEffect(() => {

@@ -4,13 +4,13 @@ import { IS_MOCK_MODE, MOCK_AI_SUMMARY } from '@/lib/mockData';
 
 export type SummaryStatus = 'idle' | 'streaming' | 'complete' | 'error' | 'unavailable';
 
-export function useFileDetail(sha: string | null) {
+export function useFileDetail(id: string | null) {
   const [summary, setSummary] = useState('');
   const [status, setStatus] = useState<SummaryStatus>('idle');
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
-    if (!sha) {
+    if (!id) {
       setSummary('');
       setStatus('idle');
       return;
@@ -22,7 +22,7 @@ export function useFileDetail(sha: string | null) {
     setStatus('streaming');
 
     if (IS_MOCK_MODE) {
-      // Simulate streaming
+      // ... same mock logic ...
       let cancelled = false;
       const chars = MOCK_AI_SUMMARY.split('');
       let i = 0;
@@ -40,7 +40,7 @@ export function useFileDetail(sha: string | null) {
     }
 
     const cleanup = streamSummary(
-      sha,
+      id,
       (chunk) => {
         setSummary((prev) => prev + chunk);
         setStatus('streaming');
@@ -50,7 +50,8 @@ export function useFileDetail(sha: string | null) {
     cleanupRef.current = cleanup;
 
     return () => cleanup();
-  }, [sha]);
+  }, [id]);
+
 
   return { summary, status };
 }

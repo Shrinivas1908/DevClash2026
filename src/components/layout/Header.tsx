@@ -11,11 +11,14 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 h-12 bg-bg-surface border-b border-border z-40 flex items-center px-4 gap-4">
       {/* Logo */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center">
-          <Network className="w-4 h-4 text-white" />
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-accent-blue to-accent-purple flex items-center justify-center shadow-lg shadow-accent-blue/20">
+          <Network className="w-5 h-5 text-white" />
         </div>
-        <span className="font-semibold text-sm text-text-primary tracking-tight">RAN</span>
+        <div className="flex flex-col">
+          <span className="font-bold text-xs text-text-primary tracking-tight leading-none uppercase">RepoMap</span>
+          <span className="text-[9px] text-text-muted font-bold uppercase tracking-widest mt-0.5">Production Beta</span>
+        </div>
       </div>
 
       {/* Repo context */}

@@ -5,30 +5,30 @@
 @tailwind utilities;
 
 :root {
-  --bg-base: #0D0F14;
-  --bg-surface: #13161E;
-  --bg-elevated: #1C2030;
-  --bg-hover: #252A3A;
+  --bg-base: #020408;
+  --bg-surface: #0D1117;
+  --bg-elevated: #161B22;
+  --bg-hover: #1F242C;
 
-  --border: #2A2F42;
-  --border-subtle: #1E2235;
+  --border: #30363D;
+  --border-subtle: #21262D;
 
-  --text-primary: #E8EAEF;
-  --text-secondary: #8B91A8;
-  --text-muted: #555C78;
+  --text-primary: #F0F6FC;
+  --text-secondary: #8B949E;
+  --text-muted: #6E7681;
 
-  --accent-blue: #4D8EF7;
-  --accent-blue-dim: #1E3A6E;
-  --accent-green: #3DD68C;
-  --accent-amber: #F5A623;
-  --accent-red: #E05C5C;
-  --accent-purple: #9B7FED;
+  --accent-blue: #2F81F7;
+  --accent-blue-dim: #1158C7;
+  --accent-green: #238636;
+  --accent-amber: #D29922;
+  --accent-red: #F85149;
+  --accent-purple: #8957E5;
 
-  --graph-node-default: #1C2030;
-  --graph-node-central: #1E3A6E;
-  --graph-node-entry: #1A3A2A;
-  --graph-edge: #2A2F42;
-  --graph-edge-highlight: #4D8EF7;
+  --graph-node-default: #161B22;
+  --graph-node-central: #1158C7;
+  --graph-node-entry: #238636;
+  --graph-edge: #30363D;
+  --graph-edge-highlight: #2F81F7;
 }
 
 * {
@@ -139,6 +139,21 @@ main {
 
 .animate-fade-in-up {
   animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.hero-title {
+  @apply text-5xl md:text-7xl font-bold tracking-tight text-center;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.hero-subtitle {
+  @apply text-lg md:text-xl text-text-secondary text-center max-w-2xl mx-auto;
+  line-height: 1.5;
+}
+
+.hero-glow {
+  background: radial-gradient(circle at center, rgba(47, 129, 247, 0.15) 0%, rgba(47, 129, 247, 0) 70%);
 }
 
 /* Dashed edge animation */

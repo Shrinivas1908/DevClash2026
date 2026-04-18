@@ -31,11 +31,19 @@ const CLONE_BASE = process.env.CLONE_BASE_DIR
 
 /**
  * Update job progress in Supabase (triggers Realtime push to frontend).
+ * Also notifies the parent thread for SSE streaming.
  */
 async function updateProgress(stage, progress, status = 'running', errorMessage = null) {
   const update = { stage, progress, status, updated_at: new Date().toISOString() };
   if (errorMessage) update.error_message = errorMessage;
+  
+  // Update DB (source of truth)
   await supabase.from('jobs').update(update).eq('id', jobId);
+  
+  // Notify parent thread (for real-time SSE)
+  if (parentPort) {
+    parentPort.postMessage({ type: 'progress', data: { ...update, id: jobId } });
+  }
 }
 
 /**

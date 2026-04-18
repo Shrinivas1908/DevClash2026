@@ -19,8 +19,12 @@ export function GraphPage() {
   const { jobId = '' } = useParams<{ jobId: string }>();
   const navigate = useNavigate();
 
-  const { currentJob, setJob } = useStore();
+  // Use individual selectors to avoid re-render on unrelated state changes
+  // and to be more compliant with React hook rules in complex components.
+  const currentJob = useStore((s) => s.currentJob);
+  const setJob = useStore((s) => s.setJob);
   const compactMode = useStore((s) => s.compactMode);
+  const setIsOffline = useStore((s) => s.setIsOffline);
 
   // Load mock job if in demo mode
   useEffect(() => {
@@ -40,13 +44,15 @@ export function GraphPage() {
   useSearch(jobId);
 
   // Offline detection
-  const setIsOffline = useStore((s) => s.setIsOffline);
   useEffect(() => {
     const onOnline = () => setIsOffline(false);
     const onOffline = () => setIsOffline(true);
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
-    return () => { window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOffline); };
+    return () => { 
+      window.removeEventListener('online', onOnline); 
+      window.removeEventListener('offline', onOffline); 
+    };
   }, [setIsOffline]);
 
   if (currentJob?.status === 'failed') {

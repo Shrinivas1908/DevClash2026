@@ -1,0 +1,493 @@
+﻿{
+    "nodes":  [
+                  {
+                      "id":  "file-19",
+                      "name":  "AuthContext.jsx",
+                      "path":  "frontend/src/context/AuthContext.jsx",
+                      "fan_in":  7,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-19",
+                      "fan_out":  0,
+                      "summary":  "Manages global user authentication state and actions, acting as a Provider for authentication context throughout the React application. It handles user login, registration, and logout by interacting with a backend API via axios and persisting token information in localStorage. This centralizes authentication logic, but includes direct localStorage usage and a hardcoded API URL.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  21
+                  },
+                  {
+                      "id":  "file-18",
+                      "name":  "App.jsx",
+                      "path":  "frontend/src/App.jsx",
+                      "fan_in":  1,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-18",
+                      "fan_out":  6,
+                      "summary":  "Establishes the application\u0027s top-level routing, directing users to appropriate portals based on their authentication status and role. It implements a PrivateRoute component for role-based access control, ensuring unauthorized users or misaligned roles are redirected. This centralizes navigation flow and security gating, relying on AuthContext for user state.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  9
+                  },
+                  {
+                      "id":  "file-21",
+                      "name":  "AdminPortal.jsx",
+                      "path":  "frontend/src/pages/AdminPortal.jsx",
+                      "fan_in":  1,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-21",
+                      "fan_out":  1,
+                      "summary":  "Implements the administrative portal, providing an interface for user management, system statistics, and other admin-specific functions. It uses component composition for UI elements like StatCards and Modals, and makes direct API calls via an axios instance configured with the user\u0027s authentication token. The file is a significant hub for admin features, suggesting potential for further decomposition of its internal components.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-22",
+                      "name":  "AlumniPortal.jsx",
+                      "path":  "frontend/src/pages/AlumniPortal.jsx",
+                      "fan_in":  1,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-22",
+                      "fan_out":  1,
+                      "summary":  "Provides the user interface and features for alumni, primarily focusing on a direct messaging system and potentially other alumni networking tools. It defines UI components like a Modal and MessageItem, interacting with backend services for message exchange and user directories via a token-authenticated axios instance. The DirectContact section is a substantial logical block that could be further modularized.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-23",
+                      "name":  "Login.jsx",
+                      "path":  "frontend/src/pages/Login.jsx",
+                      "fan_in":  1,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-23",
+                      "fan_out":  1,
+                      "summary":  "Handles the user login process, capturing credentials, invoking the authentication service provided by AuthContext, and redirecting the user upon successful authentication. It focuses solely on the login UI and logic, adhering to the Single Responsibility Principle for authentication entry. Error handling is present but basic, providing direct message feedback.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-24",
+                      "name":  "Register.jsx",
+                      "path":  "frontend/src/pages/Register.jsx",
+                      "fan_in":  1,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-24",
+                      "fan_out":  1,
+                      "summary":  "Manages the user registration process, collecting user details, including role-specific fields, and utilizing the AuthContext for backend registration. Upon successful registration, it navigates the user to their respective portal. The form dynamically adapts based on the selected role, centralizing the user signup workflow, though current error feedback is a simple string.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-25",
+                      "name":  "StudentPortal.jsx",
+                      "path":  "frontend/src/pages/StudentPortal.jsx",
+                      "fan_in":  1,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-25",
+                      "fan_out":  1,
+                      "summary":  "Implements the student portal, enabling students to search and filter an alumni directory and initiate direct messages with alumni. It includes UI components for filtering and a modal for messaging, interacting with backend APIs for user directory and messaging services using the authenticated user\u0027s token. The BatchTracking component is a core, multi-functional part that combines search, filter, and communication logic.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-20",
+                      "name":  "main.jsx",
+                      "path":  "frontend/src/main.jsx",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-20",
+                      "fan_out":  2,
+                      "summary":  "The application\u0027s entry point, responsible for rendering the root React component and providing global contexts, specifically the AuthProvider, to the entire application. It ensures that authentication state is available throughout the component tree. This file is minimal, acting solely as a bootstrap for the React application.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  2
+                  },
+                  {
+                      "id":  "file-0",
+                      "name":  "authMiddleware.js",
+                      "path":  "backend/middleware/authMiddleware.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-0",
+                      "fan_out":  0,
+                      "summary":  "Contains backend middleware functions for authenticating API requests using JWT and enforcing role-based access control. The `auth` function verifies the JWT, while `checkRole` ensures the authenticated user possesses the necessary permissions. The current fallback JWT secret is a critical security vulnerability and requires immediate attention for production deployments.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-1",
+                      "name":  "Donation.js",
+                      "path":  "backend/models/Donation.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-1",
+                      "fan_out":  0,
+                      "summary":  "Defines the Mongoose schema and model for \u0027Donation\u0027 entities in the backend, specifying fields like donor reference, amount, and associated project. It establishes the data structure for donations in the MongoDB database, serving as a foundational data layer. The `donorName` field could introduce data inconsistency if not carefully managed alongside the `donor` ObjectId reference.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-2",
+                      "name":  "Event.js",
+                      "path":  "backend/models/Event.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-2",
+                      "fan_out":  0,
+                      "summary":  "Core responsibility is to define the Mongoose schema for the `Event` entity, detailing its properties, validation, and relationships within the database. It acts as a Data Mapper, translating application event objects to MongoDB documents, implicitly depending on a `User` model. Potential technical debt includes denormalized `organizedByName` and `attendees` fields, risking data inconsistencies if the referenced user data changes.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-3",
+                      "name":  "JobPost.js",
+                      "path":  "backend/models/JobPost.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-3",
+                      "fan_out":  0,
+                      "summary":  "Defines the Mongoose schema and model for a `JobPost` entity, establishing its structure and validation for persistence in the MongoDB database. This file primarily serves as a Data Mapper, abstracting database interactions for job-related data. A potential technical debt lies in the `postedByName` field, which denormalizes user data and could lead to inconsistencies if the associated user\u0027s name is updated elsewhere.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-4",
+                      "name":  "Mentorship.js",
+                      "path":  "backend/models/Mentorship.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-4",
+                      "fan_out":  0,
+                      "summary":  "This file\u0027s core responsibility is to define the Mongoose schema for the `Mentorship` entity, specifying its data structure and validation rules for database storage. It implements the Data Mapper pattern, abstracting the mapping of mentorship objects to MongoDB documents. The denormalized `mentorName` and `menteeName` fields introduce a risk of data inconsistency if user names change.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-5",
+                      "name":  "Message.js",
+                      "path":  "backend/models/Message.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-5",
+                      "fan_out":  0,
+                      "summary":  "Defines the Mongoose schema and model for a `Message` entity, outlining its data fields, validation rules, and relationships for database storage. It operates as a Data Mapper, facilitating object-document mapping for message data. The `senderName` field presents a potential technical debt due to data denormalization, risking inconsistencies if the sender\u0027s name is updated in the `User` collection.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-6",
+                      "name":  "Resource.js",
+                      "path":  "backend/models/Resource.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-6",
+                      "fan_out":  0,
+                      "summary":  "Core responsibility is to define the Mongoose schema for the `Resource` entity, specifying its structure, validation, and relationships for database storage. It functions as a Data Mapper, abstracting the transformation between application resource objects and MongoDB documents. Potential technical debt arises from the denormalized `uploadedByName` field, which could lead to data inconsistencies if the user\u0027s name changes.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-7",
+                      "name":  "User.js",
+                      "path":  "backend/models/User.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-7",
+                      "fan_out":  0,
+                      "summary":  "This file defines the Mongoose schema for the `User` entity, encapsulating all user profile data, validation, and authentication-related fields. It serves as a foundational Data Mapper, establishing the primary data structure for users within the system. Potential complexity hotspots include a relatively broad schema combining core and professional fields, which might become cumbersome if further distinct user profiles or extended attributes are introduced.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-8",
+                      "name":  "authRoutes.js",
+                      "path":  "backend/routes/authRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-8",
+                      "fan_out":  0,
+                      "summary":  "Manages user authentication routes (register and login), serving as a Controller that handles incoming HTTP requests, performs data validation, and interacts with the User model for database operations. It heavily depends on `express` for routing, `bcryptjs` for password hashing, and `jsonwebtoken` for token issuance, implicitly using the `User` model. Potential technical debt includes mixing request validation, business logic, and database access within route handlers, and potentially using a hardcoded JWT secret fallback.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-9",
+                      "name":  "donationRoutes.js",
+                      "path":  "backend/routes/donationRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-9",
+                      "fan_out":  0,
+                      "summary":  "Provides API endpoints for donation management, enabling users to create donations and administrators to view all donations and aggregated statistics. It functions as a Controller, orchestrating requests with the `Donation` and `User` models and leveraging `auth` and `checkRole` Middleware for authorization. A complexity hotspot is the dynamic import of the `User` model inside a route handler, and the denormalized `donorName` field, which risks data inconsistency.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-10",
+                      "name":  "eventRoutes.js",
+                      "path":  "backend/routes/eventRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-10",
+                      "fan_out":  0,
+                      "summary":  "Defines API routes for event management, allowing authenticated users to create, retrieve, RSVP to, and delete events. This file acts as a Controller, processing event-related HTTP requests and coordinating with the `Event` model. It utilizes `auth` and `checkRole` middleware for authentication and role-based authorization, with direct database operations within route handlers posing a potential complexity hotspot.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-11",
+                      "name":  "jobRoutes.js",
+                      "path":  "backend/routes/jobRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-11",
+                      "fan_out":  0,
+                      "summary":  "Establishes API endpoints for managing job postings, facilitating creation, retrieval (with filtering), and deletion of job advertisements. It operates as a Controller, handling HTTP requests and interacting with the `JobPost` model for data operations, secured by `auth` and `checkRole` middleware. Direct model interaction within route handlers and the denormalized `postedByName` field represent potential areas of technical debt.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-12",
+                      "name":  "mentorshipRoutes.js",
+                      "path":  "backend/routes/mentorshipRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-12",
+                      "fan_out":  0,
+                      "summary":  "This module defines API routes for managing mentorship offers and requests, encompassing creation, listing, and student slot requests. It leverages the Express Router pattern with authentication and role-based authorization middleware, interacting directly with Mentorship and User Mongoose models for data persistence. Technical debt includes direct database operations within handlers leading to tight coupling, and generic error handling.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-13",
+                      "name":  "messageRoutes.js",
+                      "path":  "backend/routes/messageRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-13",
+                      "fan_out":  0,
+                      "summary":  "This module provides API endpoints for core messaging functionalities such as sending messages, retrieving inbox/sent messages, and marking messages as read. It utilizes the Express Router pattern with authentication middleware and interacts directly with Message and User Mongoose models for data storage. The architecture exhibits direct database access in handlers, causing tight coupling, and employs rudimentary error handling.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-14",
+                      "name":  "resourceRoutes.js",
+                      "path":  "backend/routes/resourceRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-14",
+                      "fan_out":  0,
+                      "summary":  "This module manages API routes for resources and announcements, enabling administrators to post and delete, while authenticated users can view. It implements the Express Router pattern, secured by authentication and role-based authorization middleware, and performs CRUD operations directly on the Resource and User Mongoose models. Key architectural concerns include tight coupling between route handlers and the data layer, alongside generic error responses.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-15",
+                      "name":  "userRoutes.js",
+                      "path":  "backend/routes/userRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-15",
+                      "fan_out":  0,
+                      "summary":  "This module defines comprehensive API routes for user management, including profile access/updates, user directories, and administrative functions like user verification and deletion. It utilizes the Express Router pattern, heavily relying on authentication and role-based authorization middleware, and directly queries the User Mongoose model. Its broad scope for user-related operations somewhat strains the Single Responsibility Principle, and direct database interactions foster tight coupling.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-16",
+                      "name":  "server.js",
+                      "path":  "backend/server.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-16",
+                      "fan_out":  0,
+                      "summary":  "This is the backend application\u0027s entry point, orchestrating server setup, global middleware application (CORS, JSON parsing), and MongoDB connection. It registers all feature-specific API route modules, acting as the central hub for the Express application. The design couples database connection logic directly with server setup, yet effectively integrates various service routes.",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-17",
+                      "name":  "eslint.config.js",
+                      "path":  "frontend/eslint.config.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-17",
+                      "fan_out":  0,
+                      "summary":  "This configuration file defines ESLint rules and settings for the frontend project, ensuring code quality, style consistency, and early detection of common issues. It acts as a plugin host, integrating React-specific linting plugins for hooks and refresh optimizations. This standard configuration is critical for maintaining a high bar for frontend code health.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-26",
+                      "name":  "vite.config.js",
+                      "path":  "frontend/vite.config.js",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-26",
+                      "fan_out":  0,
+                      "summary":  "This module configures Vite, the frontend build tool, primarily enabling React support through its official plugin. It defines how the React application is bundled, optimized, and served during development and production. This standard configuration is fundamental for the React project\u0027s development workflow and build process.",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-27",
+                      "name":  "arrays.php",
+                      "path":  "php/arrays.php",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-27",
+                      "fan_out":  0,
+                      "summary":  "This PHP script demonstrates and displays various array types: indexed, associative, and multidimensional, along with basic array functions. It mixes PHP logic directly with HTML templating for presentation. Architecturally, it\u0027s a self-contained demonstration script, exhibiting strong coupling between data, logic, and presentation, typical for basic PHP examples.",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-28",
+                      "name":  "form_post.php",
+                      "path":  "php/form_post.php",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-28",
+                      "fan_out":  0,
+                      "summary":  "This PHP script handles an HTML form submission via the POST method, sanitizes input, and displays the submitted data. It combines form processing logic, basic input handling, and HTML rendering within a single file. This design adheres to a simple request-response model, but lacks separation of concerns by intertwining presentation and business logic.",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-29",
+                      "name":  "index.php",
+                      "path":  "php/index.php",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-29",
+                      "fan_out":  0,
+                      "summary":  "This PHP script serves as an index and navigation hub for a collection of PHP demonstration programs. It dynamically displays current date and time using PHP\u0027s date functions and provides links to other local PHP demo files. Architecturally, it\u0027s a simple server-side templating page, self-contained and explicitly notes its independence from the main Node.js/React application.",
+                      "language":  "php",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-30",
+                      "name":  "strings.php",
+                      "path":  "php/strings.php",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-30",
+                      "fan_out":  0,
+                      "summary":  "This file functions as a monolithic web script, directly handling HTTP POST requests for string manipulation, performing operations like reverse, uppercase, and substring extraction, and then rendering the results embedded within its own HTML presentation. It tightly couples input processing, business logic, and view rendering, exhibiting a procedural design pattern typical of early web development, which limits modularity and testability.",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-31",
+                      "name":  "welcome.php",
+                      "path":  "php/welcome.php",
+                      "fan_in":  0,
+                      "realId":  "131d440b-a27b-49d4-9874-3ca621fd1cb7-file-31",
+                      "fan_out":  0,
+                      "summary":  "This file serves as a simple, self-contained web page displaying a static welcome message and the current date/time, obtained and formatted procedurally. It embeds all logic and presentation within a single PHP script, demonstrating a basic controller-view merge pattern with tight coupling between data preparation and HTML rendering. The file relies solely on built-in PHP date functions and provides a navigational link to another page.",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  }
+              ],
+    "edges":  [
+                  {
+                      "source":  "file-18",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-23",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-24",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-21",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-25",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-22",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-20",
+                      "target":  "file-18",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-20",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-21",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-22",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-23",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-24",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-25",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  }
+              ],
+    "metadata":  {
+                     "repo_url":  "https://github.com/aadish8206/allumni-management-portal",
+                     "total_files":  32,
+                     "analyzed_files":  32,
+                     "scan_depth":  1
+                 }
+}

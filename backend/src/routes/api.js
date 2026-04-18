@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const supabase = require('../services/supabase');
 const { answerQuery } = require('../services/gemini');
 const { getAllBranches } = require('../worker/stages/3_commitAnalysis');
+const jobEvents = require('../services/events');
 
 const router = express.Router();
 
@@ -146,6 +147,59 @@ router.get('/jobs/:id', async (req, res) => {
     graph_json: null, // not embedded here; use /api/graph/:jobId
     created_at: job.created_at,
     error_message: job.error_message,
+  });
+});
+
+// ─── GET /api/jobs/:id/stream ────────────────────────────────────────────────
+// SSE stream for real-time job status updates
+router.get('/jobs/:id/stream', async (req, res) => {
+  const { id } = req.params;
+
+  // Set headers for SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  console.log(`[SSE] Client connected to job stream: ${id}`);
+
+  // 1. Send initial state immediately
+  try {
+    const { data: job } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (job) {
+      res.write(`data: ${JSON.stringify(job)}\n\n`);
+    }
+  } catch (err) {
+    console.error(`[SSE] Error fetching initial job state: ${err.message}`);
+  }
+
+  // 2. Define the listener for this specific job
+  const onJobUpdate = (update) => {
+    if (update.id === id) {
+      console.log(`[SSE] Sending update for job ${id}: Stage ${update.stage}`);
+      res.write(`data: ${JSON.stringify(update)}\n\n`);
+    }
+  };
+
+  // Subscribe to the global event bus
+  jobEvents.on('job_update', onJobUpdate);
+
+  // Keep-alive heartbeat every 30 seconds
+  const heartbeat = setInterval(() => {
+    res.write(': heartbeat\n\n');
+  }, 30000);
+
+  // 3. Clean up on disconnect
+  req.on('close', () => {
+    console.log(`[SSE] Client disconnected from job stream: ${id}`);
+    jobEvents.off('job_update', onJobUpdate);
+    clearInterval(heartbeat);
+    res.end();
   });
 });
 

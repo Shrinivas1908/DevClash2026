@@ -7,6 +7,7 @@
 const { Worker } = require('worker_threads');
 const path = require('path');
 const supabase = require('../services/supabase');
+const jobEvents = require('../services/events');
 
 const POLL_INTERVAL_MS = 2000;   // Check for new jobs every 2 seconds
 const MAX_CONCURRENT = 2;        // Max simultaneous workers (free tier constraint)
@@ -47,9 +48,24 @@ async function processNextJob() {
       },
     });
 
+    // Listen for progress updates from the worker thread
+    worker.on('message', (msg) => {
+      if (msg.type === 'progress') {
+        console.log(`[JobManager] Progress update for ${job.id}: Stage ${msg.data.stage} (${msg.data.progress}%)`);
+        jobEvents.emit('job_update', msg.data);
+      }
+    });
+
     worker.on('error', (err) => {
       console.error(`[JobManager] Worker error for job ${job.id}:`, err);
       activeWorkers--;
+      // Emit error state to notify connected SSE clients
+      jobEvents.emit('job_update', { 
+        id: job.id, 
+        status: 'error', 
+        error_message: err.message,
+        updated_at: new Date().toISOString() 
+      });
     });
 
     worker.on('exit', (code) => {

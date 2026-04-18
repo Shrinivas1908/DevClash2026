@@ -6,6 +6,7 @@ import { extractRepoName } from '@/lib/utils';
 
 export function JobProgress() {
   const currentJob = useStore((s) => s.currentJob);
+  const isLiveConnected = useStore((s) => s.isLiveConnected);
   const isVisible = currentJob && (currentJob.status === 'pending' || currentJob.status === 'processing');
 
   const completedStages = currentJob?.stages.filter((s) => s.status === 'complete').length ?? 0;
@@ -46,7 +47,18 @@ export function JobProgress() {
                 <Spinner size="md" className="text-accent-blue" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-text-primary">Scanning Repository</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-semibold text-text-primary">Scanning Repository</h2>
+                  {isLiveConnected && (
+                    <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-accent-green/10 border border-accent-green/20">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-green opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-green"></span>
+                      </span>
+                      <span className="text-[10px] font-bold text-accent-green uppercase tracking-wider">Live</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-xs text-text-muted font-mono truncate max-w-[240px]">
                   {currentJob ? extractRepoName(currentJob.repo_url) : ''}
                 </p>

@@ -1,0 +1,493 @@
+﻿{
+    "nodes":  [
+                  {
+                      "id":  "file-19",
+                      "name":  "AuthContext.jsx",
+                      "path":  "frontend/src/context/AuthContext.jsx",
+                      "fan_in":  7,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-19",
+                      "fan_out":  0,
+                      "summary":  "frontend/src/context/AuthContext.jsx — a javascript file with 2 export(s) and 2 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  21
+                  },
+                  {
+                      "id":  "file-18",
+                      "name":  "App.jsx",
+                      "path":  "frontend/src/App.jsx",
+                      "fan_in":  1,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-18",
+                      "fan_out":  6,
+                      "summary":  "frontend/src/App.jsx — a javascript file with 0 export(s) and 8 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  9
+                  },
+                  {
+                      "id":  "file-21",
+                      "name":  "AdminPortal.jsx",
+                      "path":  "frontend/src/pages/AdminPortal.jsx",
+                      "fan_in":  1,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-21",
+                      "fan_out":  1,
+                      "summary":  "frontend/src/pages/AdminPortal.jsx — a javascript file with 0 export(s) and 4 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-22",
+                      "name":  "AlumniPortal.jsx",
+                      "path":  "frontend/src/pages/AlumniPortal.jsx",
+                      "fan_in":  1,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-22",
+                      "fan_out":  1,
+                      "summary":  "frontend/src/pages/AlumniPortal.jsx — a javascript file with 0 export(s) and 4 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-23",
+                      "name":  "Login.jsx",
+                      "path":  "frontend/src/pages/Login.jsx",
+                      "fan_in":  1,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-23",
+                      "fan_out":  1,
+                      "summary":  "frontend/src/pages/Login.jsx — a javascript file with 0 export(s) and 4 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-24",
+                      "name":  "Register.jsx",
+                      "path":  "frontend/src/pages/Register.jsx",
+                      "fan_in":  1,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-24",
+                      "fan_out":  1,
+                      "summary":  "frontend/src/pages/Register.jsx — a javascript file with 0 export(s) and 4 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-25",
+                      "name":  "StudentPortal.jsx",
+                      "path":  "frontend/src/pages/StudentPortal.jsx",
+                      "fan_in":  1,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-25",
+                      "fan_out":  1,
+                      "summary":  "frontend/src/pages/StudentPortal.jsx — a javascript file with 0 export(s) and 4 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  4
+                  },
+                  {
+                      "id":  "file-20",
+                      "name":  "main.jsx",
+                      "path":  "frontend/src/main.jsx",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-20",
+                      "fan_out":  2,
+                      "summary":  "frontend/src/main.jsx — a javascript file with 0 export(s) and 5 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  2
+                  },
+                  {
+                      "id":  "file-0",
+                      "name":  "authMiddleware.js",
+                      "path":  "backend/middleware/authMiddleware.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-0",
+                      "fan_out":  0,
+                      "summary":  "backend/middleware/authMiddleware.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-1",
+                      "name":  "Donation.js",
+                      "path":  "backend/models/Donation.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-1",
+                      "fan_out":  0,
+                      "summary":  "backend/models/Donation.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-2",
+                      "name":  "Event.js",
+                      "path":  "backend/models/Event.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-2",
+                      "fan_out":  0,
+                      "summary":  "backend/models/Event.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-3",
+                      "name":  "JobPost.js",
+                      "path":  "backend/models/JobPost.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-3",
+                      "fan_out":  0,
+                      "summary":  "backend/models/JobPost.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-4",
+                      "name":  "Mentorship.js",
+                      "path":  "backend/models/Mentorship.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-4",
+                      "fan_out":  0,
+                      "summary":  "backend/models/Mentorship.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-5",
+                      "name":  "Message.js",
+                      "path":  "backend/models/Message.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-5",
+                      "fan_out":  0,
+                      "summary":  "backend/models/Message.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-6",
+                      "name":  "Resource.js",
+                      "path":  "backend/models/Resource.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-6",
+                      "fan_out":  0,
+                      "summary":  "backend/models/Resource.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-7",
+                      "name":  "User.js",
+                      "path":  "backend/models/User.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-7",
+                      "fan_out":  0,
+                      "summary":  "backend/models/User.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-8",
+                      "name":  "authRoutes.js",
+                      "path":  "backend/routes/authRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-8",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/authRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-9",
+                      "name":  "donationRoutes.js",
+                      "path":  "backend/routes/donationRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-9",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/donationRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-10",
+                      "name":  "eventRoutes.js",
+                      "path":  "backend/routes/eventRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-10",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/eventRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-11",
+                      "name":  "jobRoutes.js",
+                      "path":  "backend/routes/jobRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-11",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/jobRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-12",
+                      "name":  "mentorshipRoutes.js",
+                      "path":  "backend/routes/mentorshipRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-12",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/mentorshipRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-13",
+                      "name":  "messageRoutes.js",
+                      "path":  "backend/routes/messageRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-13",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/messageRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-14",
+                      "name":  "resourceRoutes.js",
+                      "path":  "backend/routes/resourceRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-14",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/resourceRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-15",
+                      "name":  "userRoutes.js",
+                      "path":  "backend/routes/userRoutes.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-15",
+                      "fan_out":  0,
+                      "summary":  "backend/routes/userRoutes.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-16",
+                      "name":  "server.js",
+                      "path":  "backend/server.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-16",
+                      "fan_out":  0,
+                      "summary":  "backend/server.js — a javascript file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-17",
+                      "name":  "eslint.config.js",
+                      "path":  "frontend/eslint.config.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-17",
+                      "fan_out":  0,
+                      "summary":  "frontend/eslint.config.js — a javascript file with 0 export(s) and 5 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-26",
+                      "name":  "vite.config.js",
+                      "path":  "frontend/vite.config.js",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-26",
+                      "fan_out":  0,
+                      "summary":  "frontend/vite.config.js — a javascript file with 0 export(s) and 2 import(s). (AI summary unavailable)",
+                      "language":  "javascript",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-27",
+                      "name":  "arrays.php",
+                      "path":  "php/arrays.php",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-27",
+                      "fan_out":  0,
+                      "summary":  "php/arrays.php — a php file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-28",
+                      "name":  "form_post.php",
+                      "path":  "php/form_post.php",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-28",
+                      "fan_out":  0,
+                      "summary":  "php/form_post.php — a php file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-29",
+                      "name":  "index.php",
+                      "path":  "php/index.php",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-29",
+                      "fan_out":  0,
+                      "summary":  "php/index.php — a php file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "php",
+                      "is_entry_point":  true,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-30",
+                      "name":  "strings.php",
+                      "path":  "php/strings.php",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-30",
+                      "fan_out":  0,
+                      "summary":  "php/strings.php — a php file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  },
+                  {
+                      "id":  "file-31",
+                      "name":  "welcome.php",
+                      "path":  "php/welcome.php",
+                      "fan_in":  0,
+                      "realId":  "b6bcbad2-e320-4e48-8a6d-cb4ebdc4e82d-file-31",
+                      "fan_out":  0,
+                      "summary":  "php/welcome.php — a php file with 0 export(s) and 0 import(s). (AI summary unavailable)",
+                      "language":  "php",
+                      "is_entry_point":  false,
+                      "last_commit_sha":  "3bbaa87e3c78d5a0c8e36620f0c215ed02a6aebb",
+                      "composite_importance":  0
+                  }
+              ],
+    "edges":  [
+                  {
+                      "source":  "file-18",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-23",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-24",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-21",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-25",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-18",
+                      "target":  "file-22",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-20",
+                      "target":  "file-18",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-20",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-21",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-22",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-23",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-24",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  },
+                  {
+                      "source":  "file-25",
+                      "target":  "file-19",
+                      "import_type":  "static"
+                  }
+              ],
+    "metadata":  {
+                     "repo_url":  "https://github.com/aadish8206/allumni-management-portal",
+                     "total_files":  32,
+                     "analyzed_files":  32,
+                     "scan_depth":  1
+                 }
+}

@@ -19,6 +19,7 @@ export interface UISlice {
   taskFiles: string[];
   aiQuery: string;
   aiAnswer: string | null;
+  isLiveConnected: boolean;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setRightPanelOpen: (open: boolean) => void;
@@ -32,6 +33,7 @@ export interface UISlice {
   setTaskFiles: (files: string[]) => void;
   setAiQuery: (q: string) => void;
   setAiAnswer: (a: string | null) => void;
+  setIsLiveConnected: (v: boolean) => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -46,6 +48,7 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   taskFiles: [],
   aiQuery: '',
   aiAnswer: null,
+  isLiveConnected: false,
 
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
@@ -63,6 +66,7 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   setIsOffline: (v) => set({ isOffline: v }),
   setUserTask: (task: string) => set({ userTask: task }),
   setTaskFiles: (files: string[]) => set({ taskFiles: files }),
-  setAiQuery: (q: string) => set({ aiQuery: q }),
-  setAiAnswer: (a: string | null) => set({ aiAnswer: a }),
+  setAiQuery: (q) => set({ aiQuery: q }),
+  setAiAnswer: (a) => set({ aiAnswer: a }),
+  setIsLiveConnected: (v) => set({ isLiveConnected: v }),
 });

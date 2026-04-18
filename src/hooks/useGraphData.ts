@@ -6,7 +6,9 @@ import type { GraphData } from '@/types/graph';
 import { IS_MOCK_MODE, MOCK_GRAPH_DATA } from '@/lib/mockData';
 
 export function useGraphData(jobId: string, enabled: boolean) {
-  const { setGraphData, addToast, nodes } = useStore();
+  const setGraphData = useStore((s) => s.setGraphData);
+  const addToast = useStore((s) => s.addToast);
+  const nodes = useStore((s) => s.nodes);
 
   const query = useQuery({
     queryKey: ['graph', jobId],

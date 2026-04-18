@@ -144,6 +144,7 @@ returns table (
   language    text,
   importance  integer,
   summary     text,
+  headline    text,
   rank        float4
 ) language sql stable as $$
   select
@@ -152,10 +153,16 @@ returns table (
     f.language,
     f.importance,
     f.summary,
+    ts_headline(
+      'english',
+      coalesce(f.summary, f.file_path, ''),
+      websearch_to_tsquery('english', p_query),
+      'MaxFragments=1, MaxWords=15, MinWords=5, StartSel="<b>", StopSel="</b>"'
+    ) as headline,
     ts_rank(f.search_vector, websearch_to_tsquery('english', p_query)) as rank
   from public.files f
   where f.repo_id = p_repo_id
     and f.search_vector @@ websearch_to_tsquery('english', p_query)
   order by rank desc
-  limit 20;
+  limit 10;
 $$;

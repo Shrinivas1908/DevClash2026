@@ -1,5 +1,7 @@
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+
+dotenv.config();
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in environment');
@@ -15,4 +17,4 @@ const supabase = createClient(
   }
 );
 
-module.exports = supabase;
+export default supabase;

@@ -1,42 +1,30 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { createRequire } from 'module';
 
-// AST Parsers — loaded lazily
+const require = createRequire(import.meta.url);
+
+// AST Parsers — loaded lazily to save memory if not needed
 let babelParser = null;
 let tsParser = null;
-let acorn = null;
 
-function getBabelParser() {
-  if (!babelParser) babelParser = require('@babel/parser');
-  return babelParser;
+async function getBabelParser() {
+  if (!babelParser) babelParser = await import('@babel/parser');
+  return babelParser.default || babelParser;
 }
 
-function getTsParser() {
-  if (!tsParser) tsParser = require('@typescript-eslint/parser');
-  return tsParser;
+async function getTsParser() {
+  if (!tsParser) tsParser = await import('@typescript-eslint/parser');
+  return tsParser.default || tsParser;
 }
 
-function getAcorn() {
-  if (!acorn) acorn = require('acorn');
-  return acorn;
-}
-
-/**
- * Stage 2: Parse all files with AST parsers to extract imports/exports.
- * Builds the dependency graph and computes fan_in / fan_out / importance.
- *
- * @param {Array<{path, absolutePath, language, sizeBytes}>} files
- * @param {function} onProgress - callback(percent, message)
- * @returns {{ analyzedFiles: AnalyzedFile[], graphJson: {nodes, edges} }}
- */
-async function runStaticAnalysis(files, onProgress) {
+export async function runStaticAnalysis(files, onProgress) {
   onProgress(15, 'Starting AST analysis…');
 
   const total = files.length;
   const analyzed = [];
-  const pathToId = new Map(); // file path -> uuid index
+  const pathToId = new Map();
 
-  // Parallel parsing with a concurrency limit
   const concurrencyLimit = 10;
   const chunks = [];
   for (let i = 0; i < files.length; i += concurrencyLimit) {
@@ -52,7 +40,7 @@ async function runStaticAnalysis(files, onProgress) {
       const id = `file-${globalIdx}`;
       pathToId.set(file.path, id);
 
-      const result = parseFile(file);
+      const result = await parseFile(file);
       analyzed.push({
         id,
         path: file.path,
@@ -76,12 +64,9 @@ async function runStaticAnalysis(files, onProgress) {
     }
   }
 
-
   onProgress(40, 'Building dependency graph…');
-
-  // Second pass: resolve import paths to actual files (build edges)
   const edges = [];
-  const fanInCounts = new Map(); // id -> count
+  const fanInCounts = new Map();
 
   for (const file of analyzed) {
     for (const rawImport of file.rawImportPaths) {
@@ -97,14 +82,12 @@ async function runStaticAnalysis(files, onProgress) {
     }
   }
 
-  // Third pass: compute fan_in and importance
   for (const file of analyzed) {
     file.fan_in = fanInCounts.get(file.id) || 0;
     file.fan_out = edges.filter((e) => e.source === file.id).length;
     file.importance = file.fan_in * 3 + file.fan_out;
   }
 
-  // Build React Flow compatible graph (cap at top 200 by importance)
   const sortedByImportance = [...analyzed].sort((a, b) => b.importance - a.importance);
   const topFiles = sortedByImportance.slice(0, 200);
   const topIds = new Set(topFiles.map((f) => f.id));
@@ -121,9 +104,7 @@ async function runStaticAnalysis(files, onProgress) {
     last_commit_sha: '',
   }));
 
-  const graphEdges = edges.filter(
-    (e) => topIds.has(e.source) && topIds.has(e.target)
-  );
+  const graphEdges = edges.filter((e) => topIds.has(e.source) && topIds.has(e.target));
 
   onProgress(50, `Graph built: ${graphNodes.length} nodes, ${graphEdges.length} edges`);
 
@@ -134,10 +115,7 @@ async function runStaticAnalysis(files, onProgress) {
   };
 }
 
-/**
- * Parse a single file and extract imports/exports using the right parser.
- */
-function parseFile(file) {
+async function parseFile(file) {
   const imports = [];
   const exports = [];
   const rawImportPaths = [];
@@ -153,31 +131,27 @@ function parseFile(file) {
 
   try {
     if (lang === 'typescript') {
-      parseWithTsParser(code, file.path, imports, exports, rawImportPaths);
+      await parseWithTsParser(code, file.path, imports, exports, rawImportPaths);
     } else if (lang === 'javascript') {
-      parseWithBabel(code, file.path, imports, exports, rawImportPaths);
-    }
-    // For other languages (python, go, etc.) use regex-based extraction
-    else {
+      await parseWithBabel(code, file.path, imports, exports, rawImportPaths);
+    } else {
       parseWithRegex(code, file.language, imports, exports, rawImportPaths);
     }
   } catch {
-    // If AST parsing fails, fall back to regex
     try {
       parseWithRegex(code, file.language, imports, exports, rawImportPaths);
     } catch {
-      // silent fail
+      // ignore
     }
   }
 
   return { imports, exports, rawImportPaths };
 }
 
-function parseWithBabel(code, filePath, imports, exports, rawImportPaths) {
-  const parser = getBabelParser();
+async function parseWithBabel(code, filePath, imports, exports, rawImportPaths) {
+  const parser = await getBabelParser();
   let ast;
 
-  // Try different source types
   for (const sourceType of ['module', 'script']) {
     try {
       ast = parser.parse(code, {
@@ -195,8 +169,8 @@ function parseWithBabel(code, filePath, imports, exports, rawImportPaths) {
   extractFromBabelAst(ast, imports, exports, rawImportPaths);
 }
 
-function parseWithTsParser(code, filePath, imports, exports, rawImportPaths) {
-  const parser = getTsParser();
+async function parseWithTsParser(code, filePath, imports, exports, rawImportPaths) {
+  const parser = await getTsParser();
   try {
     const ast = parser.parse(code, {
       jsx: filePath.endsWith('.tsx') || filePath.endsWith('.jsx'),
@@ -207,8 +181,7 @@ function parseWithTsParser(code, filePath, imports, exports, rawImportPaths) {
     });
     extractFromEstreeAst(ast, imports, exports, rawImportPaths);
   } catch {
-    // Fall back to babel
-    parseWithBabel(code, filePath, imports, exports, rawImportPaths);
+    await parseWithBabel(code, filePath, imports, exports, rawImportPaths);
   }
 }
 
@@ -216,14 +189,12 @@ function extractFromBabelAst(ast, imports, exports, rawImportPaths) {
   if (!ast || !ast.program || !ast.program.body) return;
 
   for (const node of ast.program.body) {
-    // Import declarations: import X from './x'
     if (node.type === 'ImportDeclaration' && node.source) {
       const src = node.source.value;
       imports.push(src);
       rawImportPaths.push({ path: src, isDynamic: false });
     }
 
-    // Export declarations
     if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') {
       if (node.declaration) {
         const decl = node.declaration;
@@ -239,13 +210,11 @@ function extractFromBabelAst(ast, imports, exports, rawImportPaths) {
           if (spec.exported?.name) exports.push(spec.exported.name);
         }
       }
-      // Re-exports: export { X } from './y'
       if (node.source) {
         rawImportPaths.push({ path: node.source.value, isDynamic: false });
       }
     }
 
-    // Dynamic imports: import('./x')
     if (node.type === 'ExpressionStatement') {
       extractDynamicImports(node, rawImportPaths);
     }
@@ -253,12 +222,10 @@ function extractFromBabelAst(ast, imports, exports, rawImportPaths) {
 }
 
 function extractFromEstreeAst(ast, imports, exports, rawImportPaths) {
-  // Same logic but for ESTree-compatible ASTs (TS parser output)
   extractFromBabelAst({ program: ast }, imports, exports, rawImportPaths);
 }
 
 function extractDynamicImports(node, rawImportPaths) {
-  // Recursively look for import() calls
   const str = JSON.stringify(node);
   const matches = str.matchAll(/"type":"ImportExpression"[^}]*"value":"([^"]+)"/g);
   for (const m of matches) {
@@ -289,7 +256,6 @@ function parseWithRegex(code, language, imports, exports, rawImportPaths) {
     const funcMatches = code.matchAll(/^func\s+(\w+)/gm);
     for (const m of funcMatches) exports.push(m[1]);
   } else {
-    // Generic: look for require() and import statements
     const reqMatches = code.matchAll(/require\(['"]([^'"]+)['"]\)/g);
     for (const m of reqMatches) {
       imports.push(m[1]);
@@ -298,25 +264,19 @@ function parseWithRegex(code, language, imports, exports, rawImportPaths) {
   }
 }
 
-/**
- * Try to resolve a relative import path to a known file ID.
- */
 function resolveImport(rawImport, fromFilePath, pathToId) {
-  if (!rawImport.path.startsWith('.')) return null; // skip node_modules
+  if (!rawImport.path.startsWith('.')) return null;
 
   const fromDir = path.dirname(fromFilePath);
   const resolved = path.join(fromDir, rawImport.path).replace(/\\/g, '/');
 
-  // Try exact match first
   if (pathToId.has(resolved)) return pathToId.get(resolved);
 
-  // Try with extensions
   for (const ext of ['.ts', '.tsx', '.js', '.jsx', '.mjs']) {
     const withExt = resolved + ext;
     if (pathToId.has(withExt)) return pathToId.get(withExt);
   }
 
-  // Try index file in directory
   for (const ext of ['.ts', '.tsx', '.js', '.jsx']) {
     const indexPath = resolved + '/index' + ext;
     if (pathToId.has(indexPath)) return pathToId.get(indexPath);
@@ -338,5 +298,3 @@ function isEntryPoint(filePath) {
     dir.includes('/routes/')
   );
 }
-
-module.exports = { runStaticAnalysis };

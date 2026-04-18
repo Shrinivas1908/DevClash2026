@@ -15,6 +15,8 @@ export interface GraphSlice {
   layout: LayoutType;
   activeFilter: FilterType;
   compactMode: boolean;
+  repoId: string | null;
+  repoInsights: string | null;
   setGraphData: (data: GraphData) => void;
   setSelectedNode: (id: string | null) => void;
   setLayout: (layout: LayoutType) => void;
@@ -59,6 +61,8 @@ export const createGraphSlice: StateCreator<GraphSlice> = (set, get) => ({
   layout: 'dagre-v',
   activeFilter: 'all',
   compactMode: false,
+  repoId: null,
+  repoInsights: null,
 
   setGraphData: (data) => {
     const rawNodes = data.nodes.map(fileNodeToFlowNode);
@@ -74,7 +78,15 @@ export const createGraphSlice: StateCreator<GraphSlice> = (set, get) => ({
     const laidOut = applyDagreLayout(rawNodes, rawEdges, direction);
     const compact = data.nodes.length > 500;
 
-    set({ nodes: laidOut, edges: rawEdges, allNodes: laidOut, allEdges: rawEdges, compactMode: compact });
+    set({
+      nodes: laidOut,
+      edges: rawEdges,
+      allNodes: laidOut,
+      allEdges: rawEdges,
+      compactMode: compact,
+      repoId: data.metadata?.repo_id ?? null,
+      repoInsights: data.insights ?? null,
+    });
   },
 
   setSelectedNode: (id) => {

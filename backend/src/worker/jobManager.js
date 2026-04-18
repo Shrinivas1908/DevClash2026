@@ -1,42 +1,43 @@
 /**
  * jobManager.js — Polls Supabase for pending jobs and spawns worker threads.
  * Uses claim_next_job() SQL function (FOR UPDATE SKIP LOCKED) as an atomic job queue.
- * No Redis needed.
  */
 
-const { Worker } = require('worker_threads');
-const path = require('path');
-const supabase = require('../services/supabase');
-const jobEvents = require('../services/events');
+import { Worker } from 'worker_threads';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import supabase from '../services/supabase.js';
+import jobEvents from '../services/events.js';
+import logger from '../utils/logger.js';
 
-const POLL_INTERVAL_MS = 2000;   // Check for new jobs every 2 seconds
-const MAX_CONCURRENT = 2;        // Max simultaneous workers (free tier constraint)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const POLL_INTERVAL_MS = 2000;
+const MAX_CONCURRENT = 2;
 
 let activeWorkers = 0;
 
-const WORKER_PATH = path.resolve(__dirname, 'worker.js');
+// Update to use pipeline.js as the worker entry point
+const WORKER_PATH = path.resolve(__dirname, 'pipeline.js');
 
-/**
- * Claim and start the next pending job.
- */
 async function processNextJob() {
   if (activeWorkers >= MAX_CONCURRENT) return;
 
   try {
-    // Atomically claim the next pending job
     const { data: result, error } = await supabase.rpc('claim_next_job');
 
     if (error) {
-      console.error('[JobManager] claim_next_job error details:', error);
+      logger.error('[JobManager] claim_next_job error details:', error);
       return;
     }
 
-    if (!result || (Array.isArray(result) && result.length === 0)) return; // No pending jobs
+    if (!result || (Array.isArray(result) && result.length === 0)) return;
     const job = Array.isArray(result) ? result[0] : result;
     
     if (!job || !job.id) return;
 
-    console.log(`[JobManager] Starting job ${job.id} for ${job.repo_url} (branch: ${job.branch || 'HEAD'})`);
+    logger.info(`[JobManager] Starting job ${job.id} for ${job.repo_url}`);
     activeWorkers++;
 
     const worker = new Worker(WORKER_PATH, {
@@ -48,18 +49,16 @@ async function processNextJob() {
       },
     });
 
-    // Listen for progress updates from the worker thread
     worker.on('message', (msg) => {
       if (msg.type === 'progress') {
-        console.log(`[JobManager] Progress update for ${job.id}: Stage ${msg.data.stage} (${msg.data.progress}%)`);
+        logger.info(`[JobManager] Progress update for ${job.id}: Stage ${msg.data.stage} (${msg.data.progress}%)`);
         jobEvents.emit('job_update', msg.data);
       }
     });
 
     worker.on('error', (err) => {
-      console.error(`[JobManager] Worker error for job ${job.id}:`, err);
+      logger.error(`[JobManager] Worker error for job ${job.id}:`, err);
       activeWorkers--;
-      // Emit error state to notify connected SSE clients
       jobEvents.emit('job_update', { 
         id: job.id, 
         status: 'error', 
@@ -69,24 +68,17 @@ async function processNextJob() {
     });
 
     worker.on('exit', (code) => {
-      console.log(`[JobManager] Worker for job ${job.id} exited with code ${code}`);
+      logger.info(`[JobManager] Worker for job ${job.id} exited with code ${code}`);
       activeWorkers--;
     });
 
   } catch (err) {
-    console.error('[JobManager] Unexpected error:', err.message);
+    logger.error('[JobManager] Unexpected error:', err.message);
   }
 }
 
-/**
- * Start the job polling loop.
- */
-function startJobManager() {
-  console.log('[JobManager] Started — polling every', POLL_INTERVAL_MS, 'ms');
+export function startJobManager() {
+  logger.info(`[JobManager] Started — polling every ${POLL_INTERVAL_MS} ms`);
   setInterval(processNextJob, POLL_INTERVAL_MS);
-
-  // Also run immediately on startup
   processNextJob();
 }
-
-module.exports = { startJobManager };

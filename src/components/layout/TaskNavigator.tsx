@@ -21,11 +21,11 @@ export function TaskNavigator() {
 
   // Find recommendations based on keywords in task
   const keywords = task.toLowerCase().split(/\s+/).filter(Boolean);
-  
+
   const allNodes = useStore((s) => s.allNodes);
-  
+
   let recommendedFiles: any[] = [];
-  
+
   if (IS_MOCK_MODE) {
     const recommendedIds = new Set<string>();
     keywords.forEach(kw => {
@@ -40,7 +40,7 @@ export function TaskNavigator() {
     // Pull from the graph store which is populated by useGraphData hook
     const realFiles = allNodes.map(n => n.data as any) || [];
     if (keywords.length > 0) {
-      recommendedFiles = realFiles.filter(f => 
+      recommendedFiles = realFiles.filter(f =>
         keywords.some(kw => f.path.toLowerCase().includes(kw) || f.name.toLowerCase().includes(kw))
       ).slice(0, 15);
     } else {

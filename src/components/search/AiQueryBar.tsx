@@ -1,13 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sparkles, ArrowRight, Loader, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { askAiMock } from '@/lib/mockData';
+import { useStore } from '@/store';
+import { apiPost } from '@/lib/api';
+import { IS_MOCK_MODE, askAiMock } from '@/lib/mockData';
 
 export function AiQueryBar() {
   const [query, setQuery] = useState('');
   const [isAsking, setIsAsking] = useState(false);
   const [answer, setAnswer] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Get the real repo ID from the graph store
+  const repoId = useStore((s) => s.repoId);
+  const setAiAnswer = useStore((s) => s.setAiAnswer);
 
   // Close answer on click outside
   useEffect(() => {
@@ -27,11 +33,28 @@ export function AiQueryBar() {
     setIsAsking(true);
     setAnswer(null);
 
-    // Simulated AI thinking
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setAnswer(askAiMock(query));
-    setIsAsking(false);
+    try {
+      if (IS_MOCK_MODE || !repoId) {
+        // Fallback to mock if no repo loaded
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        setAnswer(askAiMock(query));
+      } else {
+        const response = await apiPost<{
+          files: any[];
+          explanation: string;
+          keywords: string[];
+          related_commits?: any[];
+        }>(`/api/repo/${repoId}/query`, { question: query });
+        
+        setAiAnswer(response.explanation || 'No explanation available.', response.related_commits || []);
+        setAnswer(response.explanation || 'No explanation available.');
+      }
+    } catch (err) {
+      console.error('[AiQueryBar] Query failed:', err);
+      setAnswer("I couldn't reach the AI service right now. Please try again.");
+    } finally {
+      setIsAsking(false);
+    }
   };
 
   return (
@@ -42,8 +65,9 @@ export function AiQueryBar() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask AI where code is handled..."
-          className="w-full bg-bg-elevated border border-border rounded-full pl-9 pr-10 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30 transition-all"
+          placeholder={repoId ? 'Ask AI where code is handled...' : 'Load a repo to ask AI...'}
+          disabled={isAsking}
+          className="w-full bg-bg-elevated border border-border rounded-full pl-9 pr-10 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-blue focus:ring-1 focus:ring-accent-blue/30 transition-all disabled:opacity-60"
         />
         <div className="absolute right-1 flex items-center gap-1">
           {query && !isAsking && (

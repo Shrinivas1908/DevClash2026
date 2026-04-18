@@ -21,8 +21,10 @@ export interface DependencyEdgeData {
 export interface GraphData {
   nodes: FileNodeData[];
   edges: DependencyEdgeData[];
+  insights?: string;
   metadata: {
     repo_url: string;
+    repo_id?: string;
     total_files: number;
     analyzed_files: number;
     scan_depth: number;

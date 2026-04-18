@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Filter } from 'lucide-react';
+import { ChevronLeft, Filter, Sparkles } from 'lucide-react';
 import { useStore } from '@/store';
 import { Badge, importanceBadge } from '@/components/ui/Badge';
 import { SearchBar } from '@/components/search/SearchBar';
@@ -36,6 +36,7 @@ export function Sidebar() {
   const allNodes = useStore((s) => s.allNodes);
   const setSelectedNode = useStore((s) => s.setSelectedNode);
   const setRightPanelOpen = useStore((s) => s.setRightPanelOpen);
+  const aiAnswer = useStore((s) => s.aiAnswer);
 
   const sortedFiles = [...allNodes]
     .map((n) => n.data as unknown as FileNodeData)
@@ -86,7 +87,23 @@ export function Sidebar() {
               {/* Content: search results or file list */}
               <div className="flex-1 overflow-y-auto">
                 {searchQuery.trim() ? (
-                  <SearchResults results={searchResults} />
+                  <div>
+                    {/* AI Answer */}
+                    {aiAnswer && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mx-3 mt-3 mb-1 p-3 bg-accent-purple/10 border border-accent-purple/20 rounded-xl"
+                      >
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                          <Sparkles className="w-3 h-3 text-accent-purple" />
+                          <span className="text-[9px] font-black uppercase tracking-widest text-accent-purple">AI Answer</span>
+                        </div>
+                        <p className="text-[11px] text-text-secondary leading-relaxed">{aiAnswer}</p>
+                      </motion.div>
+                    )}
+                    <SearchResults results={searchResults} />
+                  </div>
                 ) : (
                   <div>
                     <p className="px-3 py-2 text-xs text-text-muted font-medium uppercase tracking-wide">

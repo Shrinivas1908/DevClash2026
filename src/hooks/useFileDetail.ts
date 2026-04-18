@@ -22,7 +22,6 @@ export function useFileDetail(id: string | null) {
     setStatus('streaming');
 
     if (IS_MOCK_MODE) {
-      // ... same mock logic ...
       let cancelled = false;
       const chars = MOCK_AI_SUMMARY.split('');
       let i = 0;
@@ -45,7 +44,10 @@ export function useFileDetail(id: string | null) {
         setSummary((prev) => prev + chunk);
         setStatus('streaming');
       },
+      // onError — summary unavailable or connection failed
       () => setStatus('unavailable'),
+      // onComplete — the backend sent 'event: end'
+      () => setStatus('complete'),
     );
     cleanupRef.current = cleanup;
 

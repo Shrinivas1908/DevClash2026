@@ -11,6 +11,8 @@ export function useSearch(jobId: string) {
   const setIsSearching = useStore((s) => s.setIsSearching);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
   const setAiAnswer = useStore((s) => s.setAiAnswer);
+  // Use the real repo UUID stored in graphSlice after graph is loaded
+  const repoId = useStore((s) => s.repoId);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(
@@ -29,31 +31,35 @@ export function useSearch(jobId: string) {
           results = MOCK_SEARCH_RESULTS.filter((r) =>
             r.path.toLowerCase().includes(q.toLowerCase()),
           );
+          setAiAnswer(null);
         } else {
+          // Use repoId (from repos table) if available; fallback to jobId
+          const targetId = repoId || jobId;
+          if (!targetId) {
+            setIsSearching(false);
+            return;
+          }
           const response = await apiPost<{
-            files: any[];
+            files: SearchResult[];
             explanation: string;
             keywords: string[];
-          }>(`/api/repo/${jobId}/query`, { question: q });
-          
-          results = response.files.map((f: any) => ({
-            id: f.id,
-            path: f.file_path,
-            rank: f.rank,
-            summary: f.summary
-          })) as SearchResult[];
-          
-          setAiAnswer(response.explanation);
+            related_commits?: any[];
+          }>(`/api/repo/${targetId}/query`, { question: q });
+
+          // Backend now returns SearchResult-compatible objects directly
+          results = response.files;
+          setAiAnswer(response.explanation || null, response.related_commits || []);
         }
         setSearchResults(results);
       } catch (err) {
         console.error('[useSearch] Error:', err);
         setSearchResults([]);
+        setAiAnswer(null);
       } finally {
         setIsSearching(false);
       }
-    }, 300),
-    [jobId, setSearchResults, setIsSearching, setAiAnswer],
+    }, 400),
+    [repoId, jobId, setSearchResults, setIsSearching, setAiAnswer],
   );
 
   useEffect(() => {

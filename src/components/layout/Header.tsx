@@ -1,12 +1,14 @@
 import { GitBranch, Wifi, WifiOff, Network } from 'lucide-react';
 import { useStore } from '@/store';
 import { Badge } from '@/components/ui/Badge';
-import { extractRepoName } from '@/lib/utils';
+import { extractRepoName, cn } from '@/lib/utils';
 import { AiQueryBar } from '@/components/search/AiQueryBar';
 
 export function Header() {
   const currentJob = useStore((s) => s.currentJob);
   const isOffline = useStore((s) => s.isOffline);
+  const currentView = useStore((s) => s.currentView);
+  const setCurrentView = useStore((s) => s.setCurrentView);
 
   return (
     <header className="fixed top-0 left-0 right-0 h-12 bg-bg-surface border-b border-border z-40 flex items-center px-4 gap-4">
@@ -39,8 +41,29 @@ export function Header() {
       )}
 
       {/* AI Query Bar - Centered */}
-      <div className="flex-1 flex justify-center max-w-lg">
+      <div className="flex-1 flex justify-center max-w-lg gap-4">
         <AiQueryBar />
+        
+        <div className="flex bg-bg-base/50 p-1 rounded-lg border border-border">
+          <button
+            onClick={() => setCurrentView('graph')}
+            className={cn(
+              "px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all",
+              currentView === 'graph' ? "bg-accent-blue text-white shadow-lg shadow-accent-blue/20" : "text-text-muted hover:text-text-primary"
+            )}
+          >
+            Graph
+          </button>
+          <button
+            onClick={() => setCurrentView('stats')}
+            className={cn(
+              "px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all",
+              currentView === 'stats' ? "bg-accent-blue text-white shadow-lg shadow-accent-blue/20" : "text-text-muted hover:text-text-primary"
+            )}
+          >
+            Stats
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 flex justify-end">

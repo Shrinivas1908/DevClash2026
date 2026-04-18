@@ -2,7 +2,7 @@
  * eventBus.js — A simple EventEmitter to bridge worker updates to SSE clients.
  */
 
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
 
 class JobEventBus extends EventEmitter {
   /**
@@ -25,4 +25,4 @@ class JobEventBus extends EventEmitter {
   }
 }
 
-module.exports = new JobEventBus();
+export default new JobEventBus();

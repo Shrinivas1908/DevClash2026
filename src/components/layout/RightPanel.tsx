@@ -8,6 +8,7 @@ import type { FileNodeData } from '@/types/graph';
 import { truncateSha, getLanguageColor } from '@/lib/utils';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { IssueStats } from '@/components/analytics/IssueStats';
 
 function SkeletonLine({ w }: { w: string }) {
   return <div className={cn('skeleton h-3 rounded', w)} />;
@@ -36,6 +37,10 @@ export function RightPanel() {
   const setSelectedNode = useStore((s) => s.setSelectedNode);
   const allNodes = useStore((s) => s.allNodes);
   const allEdges = useStore((s) => s.allEdges);
+  const repoInsights = useStore((s) => s.repoInsights);
+  const aiAnswer = useStore((s) => s.aiAnswer);
+  const repoId = useStore((s) => s.repoId);
+  const relatedCommits = useStore((s) => s.relatedCommits);
 
   const [activeTab, setActiveTab] = useState<Tab>('imports');
 
@@ -227,17 +232,49 @@ export function RightPanel() {
               </div>
 
               <div className="p-6 space-y-8 overflow-y-auto">
+                {/* AI Answer from search query */}
+                {aiAnswer && (
+                  <section>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4 text-accent-blue" />
+                      <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Query Answer</h3>
+                    </div>
+                    <div className="relative bg-accent-blue/5 border border-accent-blue/20 rounded-xl p-4 pl-5 overflow-hidden mb-4">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-accent-blue" />
+                      <p className="text-[13px] text-text-secondary leading-relaxed">{aiAnswer}</p>
+                    </div>
+
+                    {relatedCommits.length > 0 && (
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-2">Matched Latest Changes</p>
+                        {relatedCommits.map((commit: any) => (
+                          <div key={commit.commit_hash} className="bg-bg-elevated/40 border border-border/50 rounded-xl p-3 hover:border-accent-blue/30 transition-all group">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <GitCommit className="w-3 h-3 text-accent-blue" />
+                              <span className="text-[11px] font-bold text-text-primary truncate">{commit.message}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-[9px] text-text-muted">
+                              <span>{commit.author}</span>
+                              <span className="font-mono opacity-60">{commit.commit_hash.slice(0, 7)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
+
                 <section>
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-4 h-4 text-accent-purple" />
                     <h3 className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Architecture Snapshot</h3>
                   </div>
-                  
+
                   <div className="space-y-6">
-                    {(currentJob?.graph_json as any)?.insights ? (
+                    {repoInsights ? (
                       <div className="prose prose-invert max-w-none">
                         <div className="text-[13px] text-text-secondary leading-relaxed font-medium space-y-4 whitespace-pre-wrap">
-                          {(currentJob?.graph_json as any).insights}
+                          {repoInsights}
                         </div>
                       </div>
                     ) : (
@@ -262,8 +299,12 @@ export function RightPanel() {
                     </div>
                   </div>
                 </section>
+
+                <section className="bg-bg-elevated/10 rounded-2xl border border-border/50">
+                   {repoId && <IssueStats repoId={repoId} />}
+                </section>
               </div>
-              
+
               <div className="mt-auto p-6 border-t border-border bg-bg-base/30">
                 <p className="text-[10px] text-text-muted text-center leading-relaxed">
                   Select any node in the graph for detailed component analysis.

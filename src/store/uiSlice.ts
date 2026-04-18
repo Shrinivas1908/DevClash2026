@@ -8,6 +8,7 @@ export interface Toast {
 }
 
 export interface UISlice {
+  currentView: 'graph' | 'stats';
   sidebarOpen: boolean;
   rightPanelOpen: boolean;
   searchQuery: string;
@@ -19,9 +20,11 @@ export interface UISlice {
   taskFiles: string[];
   aiQuery: string;
   aiAnswer: string | null;
+  relatedCommits: any[];
   isLiveConnected: boolean;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
+  setCurrentView: (view: 'graph' | 'stats') => void;
   setRightPanelOpen: (open: boolean) => void;
   setSearchQuery: (q: string) => void;
   setSearchResults: (r: SearchResult[]) => void;
@@ -32,11 +35,12 @@ export interface UISlice {
   setUserTask: (task: string) => void;
   setTaskFiles: (files: string[]) => void;
   setAiQuery: (q: string) => void;
-  setAiAnswer: (a: string | null) => void;
+  setAiAnswer: (a: string | null, commits?: any[]) => void;
   setIsLiveConnected: (v: boolean) => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
+  currentView: 'graph',
   sidebarOpen: true,
   rightPanelOpen: false,
   searchQuery: '',
@@ -48,10 +52,12 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   taskFiles: [],
   aiQuery: '',
   aiAnswer: null,
+  relatedCommits: [],
   isLiveConnected: false,
 
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setCurrentView: (view) => set({ currentView: view }),
   setRightPanelOpen: (open) => set({ rightPanelOpen: open }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchResults: (r) => set({ searchResults: r }),
@@ -67,6 +73,6 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   setUserTask: (task: string) => set({ userTask: task }),
   setTaskFiles: (files: string[]) => set({ taskFiles: files }),
   setAiQuery: (q) => set({ aiQuery: q }),
-  setAiAnswer: (a) => set({ aiAnswer: a }),
+  setAiAnswer: (a, commits = []) => set({ aiAnswer: a, relatedCommits: commits }),
   setIsLiveConnected: (v) => set({ isLiveConnected: v }),
 });

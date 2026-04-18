@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const simpleGit = require('simple-git');
+import path from 'path';
+import fs from 'fs';
+import simpleGit from 'simple-git';
 
 const ALLOWED_EXTENSIONS = new Set([
   '.js', '.ts', '.tsx', '.jsx', '.mjs', '.cjs',
@@ -13,31 +13,18 @@ const SKIP_DIRS = new Set([
   'target', 'bin', 'obj', '.turbo', '.vite',
 ]);
 
-const MAX_FILE_SIZE_BYTES = 500 * 1024; // 500KB
+const MAX_FILE_SIZE_BYTES = 500 * 1024;
 
-/**
- * Stage 1: Clone the repository and walk its file tree.
- *
- * @param {object} params
- * @param {string} params.repoUrl
- * @param {string} params.branch  - branch name or 'HEAD'
- * @param {string} params.cloneDir - local directory to clone into
- * @param {function} params.onProgress - callback(percent, message)
- * @returns {Promise<{files: FileEntry[], commitSha: string, repoName: string, languageStats: object}>}
- */
-async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
+export async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
   onProgress(5, 'Cloning repository…');
 
-  // Clean clone dir if it exists
   if (fs.existsSync(cloneDir)) {
     fs.rmSync(cloneDir, { recursive: true, force: true });
   }
   fs.mkdirSync(cloneDir, { recursive: true });
 
   const git = simpleGit();
-
-  // Build clone options — shallow clone for speed
-  const cloneOptions = ['--depth=1', '--single-branch'];
+  const cloneOptions = ['--single-branch'];
   if (branch && branch !== 'HEAD') {
     cloneOptions.push('--branch', branch);
   }
@@ -45,9 +32,8 @@ async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
   try {
     await git.clone(repoUrl, cloneDir, cloneOptions);
   } catch (err) {
-    // If branch not found, try default branch
     if (err.message.includes('not found') || err.message.includes('Remote branch')) {
-      await git.clone(repoUrl, cloneDir, ['--depth=1']);
+      await git.clone(repoUrl, cloneDir);
     } else {
       throw err;
     }
@@ -55,12 +41,9 @@ async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
 
   onProgress(8, 'Resolving HEAD commit…');
   const repoGit = simpleGit(cloneDir);
-
-  // Get the current HEAD commit SHA
   const logResult = await repoGit.log({ maxCount: 1 });
   const commitSha = logResult.latest?.hash || 'unknown';
 
-  // Get current branch name
   let currentBranch = branch;
   try {
     const branchResult = await repoGit.revparse(['--abbrev-ref', 'HEAD']);
@@ -69,7 +52,6 @@ async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
     currentBranch = branch || 'main';
   }
 
-  // Extract repo name from URL
   const repoName = repoUrl
     .replace(/\.git$/, '')
     .split('/')
@@ -77,11 +59,8 @@ async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
     .join('/');
 
   onProgress(10, 'Walking file tree…');
-
-  // Walk the file tree
   const files = [];
   const languageStats = {};
-
   walkDir(cloneDir, cloneDir, files, languageStats);
 
   onProgress(15, `Found ${files.length} source files`);
@@ -89,9 +68,6 @@ async function runIngestion({ repoUrl, branch, cloneDir, onProgress }) {
   return { files, commitSha, repoName, currentBranch, languageStats };
 }
 
-/**
- * Recursively walk a directory and collect source files.
- */
 function walkDir(baseDir, currentDir, files, languageStats) {
   let entries;
   try {
@@ -102,7 +78,7 @@ function walkDir(baseDir, currentDir, files, languageStats) {
 
   for (const entry of entries) {
     if (SKIP_DIRS.has(entry.name)) continue;
-    if (entry.name.startsWith('.')) continue; // skip hidden files/dirs
+    if (entry.name.startsWith('.')) continue;
 
     const fullPath = path.join(currentDir, entry.name);
 
@@ -119,11 +95,8 @@ function walkDir(baseDir, currentDir, files, languageStats) {
         continue;
       }
 
-      if (stat.size > MAX_FILE_SIZE_BYTES) continue; // skip large files
-
+      if (stat.size > MAX_FILE_SIZE_BYTES) continue;
       const relativePath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
-
-      // Count language stats
       const lang = extToLanguage(ext);
       languageStats[lang] = (languageStats[lang] || 0) + 1;
 
@@ -137,10 +110,7 @@ function walkDir(baseDir, currentDir, files, languageStats) {
   }
 }
 
-/**
- * Get list of all branches in the cloned repo.
- */
-async function getRepoBranches(cloneDir) {
+export async function getRepoBranches(cloneDir) {
   try {
     const git = simpleGit(cloneDir);
     const result = await git.branch(['-r']);
@@ -163,5 +133,3 @@ function extToLanguage(ext) {
   };
   return map[ext] || 'unknown';
 }
-
-module.exports = { runIngestion, getRepoBranches };

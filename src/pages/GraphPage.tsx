@@ -12,6 +12,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { RightPanel } from '@/components/layout/RightPanel';
 import { ArchGraph } from '@/components/graph/ArchGraph';
 import { JobProgress } from '@/components/ingestion/JobProgress';
+import { StatsContainer } from '@/components/analytics/StatsContainer';
 import { Button } from '@/components/ui/Button';
 import { IS_MOCK_MODE, MOCK_JOB } from '@/lib/mockData';
 
@@ -25,6 +26,7 @@ export function GraphPage() {
   const setJob = useStore((s) => s.setJob);
   const compactMode = useStore((s) => s.compactMode);
   const setIsOffline = useStore((s) => s.setIsOffline);
+  const currentView = useStore((s) => s.currentView);
 
   // Load mock job if in demo mode
   useEffect(() => {
@@ -95,17 +97,18 @@ export function GraphPage() {
       {/* Main content area */}
       <div className={`flex flex-1 overflow-hidden ${compactMode ? '' : 'mt-12'}`} style={{ marginTop: compactMode ? undefined : '48px' }}>
         <ReactFlowProvider>
-          {/* Sidebar */}
-          <Sidebar />
-
-          {/* Graph canvas */}
-          <div className="flex-1 relative overflow-hidden">
-            <ArchGraph />
-            <JobProgress />
-          </div>
-
-          {/* Right panel */}
-          <RightPanel />
+          {currentView === 'graph' ? (
+            <>
+              <Sidebar />
+              <div className="flex-1 relative overflow-hidden">
+                <ArchGraph />
+                <JobProgress />
+              </div>
+              <RightPanel />
+            </>
+          ) : (
+            <StatsContainer />
+          )}
         </ReactFlowProvider>
       </div>
     </div>

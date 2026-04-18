@@ -1,17 +1,16 @@
 /**
- * routes/api.js — All 9 REST endpoints for the Repository Architecture Navigator.
+ * routes/api.js — REST endpoints for the Repository Architecture Navigator (ES Module).
  */
 
-const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const supabase = require('../services/supabase');
-const { answerQuery } = require('../services/gemini');
-const { getAllBranches } = require('../worker/stages/3_commitAnalysis');
-const jobEvents = require('../services/events');
+import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import supabase from '../services/supabase.js';
+import jobEvents from '../services/events.js';
+import * as gemini from '../services/geminiService.js';
+import logger from '../utils/logger.js';
+import path from 'path';
 
 const router = express.Router();
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
 
 function validateGithubUrl(url) {
   try {
@@ -22,43 +21,6 @@ function validateGithubUrl(url) {
   }
 }
 
-// ─── POST /api/repo/analyze ───────────────────────────────────────────────────
-// Accepts {repo_url, task_description, branch}, creates a job, returns {job_id}
-router.post('/repo/analyze', async (req, res) => {
-  const { repo_url, task_description = '', branch = 'HEAD' } = req.body;
-
-  if (!repo_url) {
-    return res.status(400).json({ error: 'repo_url is required' });
-  }
-
-  if (!validateGithubUrl(repo_url)) {
-    return res.status(400).json({ error: 'Invalid GitHub URL. Must be https://github.com/owner/repo' });
-  }
-
-  const { data: job, error } = await supabase
-    .from('jobs')
-    .insert({
-      id: uuidv4(),
-      repo_url: repo_url.trim(),
-      branch: branch || 'HEAD',
-      task_description: task_description.trim(),
-      status: 'pending',
-      stage: 0,
-      progress: 0,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('[API] Insert job failed:', error);
-    return res.status(500).json({ error: 'Failed to create analysis job' });
-  }
-
-  console.log(`[API] Job created: ${job.id} for ${repo_url}`);
-  return res.status(202).json({ job_id: job.id, jobId: job.id });
-});
-
-// ─── POST /api/jobs (alias for frontend compatibility) ────────────────────────
 router.post('/jobs', async (req, res) => {
   const { repo_url, task_description = '', branch = 'HEAD' } = req.body;
 
@@ -79,448 +41,273 @@ router.post('/jobs', async (req, res) => {
     .select()
     .single();
 
-  if (error) return res.status(500).json({ error: 'Failed to create job' });
+  if (error) return res.status(500).json({ error: 'Failed to create analysis job' });
 
-  return res.status(202).json({ jobId: job.id, job_id: job.id });
+  return res.status(202).json({ job_id: job.id, jobId: job.id });
 });
 
-// ─── GET /api/job/:id/status ──────────────────────────────────────────────────
-// Polling fallback; returns {status, stage, progress, error}
-router.get('/job/:id/status', async (req, res) => {
-  const { data: job, error } = await supabase
-    .from('jobs')
-    .select('id, status, stage, progress, error_message, updated_at')
-    .eq('id', req.params.id)
-    .single();
-
-  if (error || !job) return res.status(404).json({ error: 'Job not found' });
-
-  return res.json({
-    status: job.status,
-    stage: job.stage,
-    progress: job.progress,
-    error: job.error_message,
-    updated_at: job.updated_at,
-  });
-});
-
-// ─── GET /api/jobs/:id ────────────────────────────────────────────────────────
-// Full job object (used by frontend useJobRealtime hook)
 router.get('/jobs/:id', async (req, res) => {
   const { data: job, error } = await supabase
     .from('jobs')
-    .select('*')
+    .select('*, repos(*)')
     .eq('id', req.params.id)
     .single();
 
   if (error || !job) return res.status(404).json({ error: 'Job not found' });
 
-  // Map DB status to frontend JobStatus type
-  const statusMap = {
-    pending: 'pending',
-    running: 'processing',
-    done: 'complete',
-    error: 'failed',
-  };
-
-  // Build stages array compatible with frontend PipelineStage type
+  const statusMap = { pending: 'pending', running: 'processing', done: 'complete', error: 'failed' };
   const stages = [1, 2, 3, 4].map((stageNum) => ({
     stage: stageNum,
     name: ['Repo Ingestion', 'Static Analysis', 'Commit Analysis', 'AI Summaries'][stageNum - 1],
-    status:
-      job.stage > stageNum
-        ? 'complete'
-        : job.stage === stageNum
-        ? job.status === 'error'
-          ? 'failed'
-          : 'running'
-        : 'waiting',
-    started_at: null,
-    completed_at: null,
+    status: job.stage > stageNum ? 'complete' : job.stage === stageNum ? statusMap[job.status] : 'pending',
   }));
+
+  const repo = job.repos?.[0] || null;
 
   return res.json({
     id: job.id,
     repo_url: job.repo_url,
-    status: statusMap[job.status] || job.status,
+    status: statusMap[job.status],
+    progress: job.progress,
+    stage: job.stage,
     stages,
-    graph_json: null, // not embedded here; use /api/graph/:jobId
+    ai_context: repo?.ai_context || null,
+    repo_id: repo?.id || null,
     created_at: job.created_at,
     error_message: job.error_message,
   });
 });
 
-// ─── GET /api/jobs/:id/stream ────────────────────────────────────────────────
-// SSE stream for real-time job status updates
 router.get('/jobs/:id/stream', async (req, res) => {
   const { id } = req.params;
-
-  // Set headers for SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  console.log(`[SSE] Client connected to job stream: ${id}`);
-
-  // 1. Send initial state immediately
   try {
-    const { data: job } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (job) {
-      res.write(`data: ${JSON.stringify(job)}\n\n`);
-    }
-  } catch (err) {
-    console.error(`[SSE] Error fetching initial job state: ${err.message}`);
-  }
+    const { data: job } = await supabase.from('jobs').select('*').eq('id', id).single();
+    if (job) res.write(`data: ${JSON.stringify(job)}\n\n`);
+  } catch (err) { }
 
-  // 2. Define the listener for this specific job
   const onJobUpdate = (update) => {
-    if (update.id === id) {
-      console.log(`[SSE] Sending update for job ${id}: Stage ${update.stage}`);
-      res.write(`data: ${JSON.stringify(update)}\n\n`);
-    }
+    if (update.id === id) res.write(`data: ${JSON.stringify(update)}\n\n`);
   };
 
-  // Subscribe to the global event bus
   jobEvents.on('job_update', onJobUpdate);
+  const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 30000);
 
-  // Keep-alive heartbeat every 30 seconds
-  const heartbeat = setInterval(() => {
-    res.write(': heartbeat\n\n');
-  }, 30000);
-
-  // 3. Clean up on disconnect
   req.on('close', () => {
-    console.log(`[SSE] Client disconnected from job stream: ${id}`);
     jobEvents.off('job_update', onJobUpdate);
     clearInterval(heartbeat);
     res.end();
   });
 });
 
-// ─── GET /api/job/:id/repo ────────────────────────────────────────────────────
-// Returns repo_id + metadata once analysis completes
-router.get('/job/:id/repo', async (req, res) => {
-  const { data: job } = await supabase
-    .from('jobs')
-    .select('id, status')
-    .eq('id', req.params.id)
-    .single();
-
-  if (!job) return res.status(404).json({ error: 'Job not found' });
-  if (job.status !== 'done') return res.status(202).json({ status: job.status, message: 'Analysis not complete yet' });
-
-  const { data: repo, error } = await supabase
-    .from('repos')
-    .select('id, repo_url, repo_name, branch, commit_sha, language_stats, total_files, analyzed_files')
-    .eq('job_id', req.params.id)
-    .single();
-
-  if (error || !repo) return res.status(404).json({ error: 'Repo not found' });
-
-  return res.json(repo);
-});
-
-// ─── GET /api/graph/:jobId ────────────────────────────────────────────────────
-// Returns React-Flow compatible graph JSON for a job
 router.get('/graph/:jobId', async (req, res) => {
-  let { data: repo, error } = await supabase
-    .from('repos')
-    .select('id, graph_json, repo_url, total_files, analyzed_files')
-    .eq('job_id', req.params.jobId)
-    .single();
-
+  let { data: repo } = await supabase.from('repos').select('id, graph_json, repo_url, total_files, analyzed_files').eq('job_id', req.params.jobId).single();
   if (!repo) {
-    // If not found by job_id, it might be a cache hit. Fall back to the latest repo for this URL.
     const { data: job } = await supabase.from('jobs').select('repo_url').eq('id', req.params.jobId).single();
-    if (job && job.repo_url) {
-      const { data: fallbackRepo } = await supabase
-        .from('repos')
-        .select('id, graph_json, repo_url, total_files, analyzed_files')
-        .eq('repo_url', job.repo_url)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+    if (job?.repo_url) {
+      const { data: fallbackRepo } = await supabase.from('repos').select('id, graph_json, repo_url, total_files, analyzed_files').eq('repo_url', job.repo_url).order('created_at', { ascending: false }).limit(1).single();
       if (fallbackRepo) repo = fallbackRepo;
     }
   }
 
-  if (!repo) return res.status(404).json({ error: 'Graph not found. Analysis may still be running.' });
-  if (!repo.graph_json) return res.status(404).json({ error: 'Graph not yet computed' });
+  if (!repo?.graph_json) return res.status(404).json({ error: 'Graph not found' });
 
   return res.json({
     nodes: repo.graph_json.nodes || [],
     edges: repo.graph_json.edges || [],
-    metadata: {
-      repo_url: repo.repo_url,
-      total_files: repo.total_files,
-      analyzed_files: repo.analyzed_files,
-      scan_depth: 1,
-    },
+    insights: repo.graph_json.insights || null,
+    metadata: { repo_id: repo.id, repo_url: repo.repo_url, total_files: repo.total_files, analyzed_files: repo.analyzed_files },
   });
 });
 
-// ─── GET /api/repo/:id/graph ──────────────────────────────────────────────────
-// Returns React-Flow graph JSON for a repo ID (capped to top 200 nodes)
-router.get('/repo/:id/graph', async (req, res) => {
-  const { data: repo, error } = await supabase
-    .from('repos')
-    .select('graph_json, repo_url, total_files, analyzed_files')
-    .eq('id', req.params.id)
-    .single();
-
-  if (error || !repo) return res.status(404).json({ error: 'Repo not found' });
-
-  return res.json({
-    nodes: repo.graph_json?.nodes || [],
-    edges: repo.graph_json?.edges || [],
-    metadata: {
-      repo_url: repo.repo_url,
-      total_files: repo.total_files,
-      analyzed_files: repo.analyzed_files,
-      scan_depth: 1,
-    },
-  });
-});
-
-// ─── GET /api/repo/:id/files ──────────────────────────────────────────────────
-// Returns files ranked by importance; supports ?task= and ?issue= filters
 router.get('/repo/:id/files', async (req, res) => {
   const { task, issue } = req.query;
-
-  let query = supabase
-    .from('files')
-    .select('id, file_path, language, fan_in, fan_out, importance, is_entry_point, summary, issues')
-    .eq('repo_id', req.params.id)
-    .order('importance', { ascending: false })
-    .limit(500);
-
-  if (issue) {
-    query = query.contains('issues', [issue]);
-  }
-
+  let query = supabase.from('files').select('id, file_path, language, importance, is_entry_point, summary, issues').eq('repo_id', req.params.id).order('importance', { ascending: false }).limit(500);
+  if (issue) query = query.contains('issues', [issue]);
   const { data: files, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
 
-  // Task-based ranking: keyword match in file path + summary + issue refs
   let ranked = files || [];
-  if (task && task.trim()) {
+  if (task?.trim()) {
     const keywords = task.toLowerCase().split(/\W+/).filter((w) => w.length > 2);
-    ranked = ranked
-      .map((f) => {
-        const haystack = `${f.file_path} ${f.summary || ''} ${(f.issues || []).join(' ')}`.toLowerCase();
-        const matchScore = keywords.reduce((acc, kw) => acc + (haystack.includes(kw) ? 1 : 0), 0);
-        return { ...f, task_score: matchScore };
-      })
-      .sort((a, b) => b.task_score - a.task_score || b.importance - a.importance);
+    ranked = ranked.map((f) => {
+      const haystack = `${f.file_path} ${f.summary || ''} ${(f.issues || []).join(' ')}`.toLowerCase();
+      const score = keywords.reduce((acc, kw) => acc + (haystack.includes(kw) ? 1 : 0), 0);
+      return { ...f, task_score: score };
+    }).sort((a, b) => b.task_score - a.task_score || b.importance - a.importance);
   }
-
   return res.json(ranked);
 });
 
-// ─── GET /api/repo/:id/commits ────────────────────────────────────────────────
-// Returns commit history; supports ?issue= and ?branch= filters
-router.get('/repo/:id/commits', async (req, res) => {
-  const { issue, branch } = req.query;
+router.get('/repo/:id/onboarding-path', async (req, res) => {
+  const { data: repo } = await supabase.from('repos').select('onboarding_path').eq('id', req.params.id).single();
+  return res.json({ onboarding_path: repo?.onboarding_path || [] });
+});
 
-  let query = supabase
+router.get('/repo/:id/commits', async (req, res) => {
+  const { data: commits, error } = await supabase
     .from('commits')
-    .select('id, commit_hash, message, author, authored_at, branch, issue_refs, files_touched')
+    .select('*')
     .eq('repo_id', req.params.id)
     .order('authored_at', { ascending: false })
-    .limit(200);
+    .limit(100);
 
-  if (issue) query = query.contains('issue_refs', [issue]);
-  if (branch) query = query.eq('branch', branch);
-
-  const { data: commits, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
-
   return res.json(commits || []);
 });
 
-// ─── GET /api/files/:id/summary ───────────────────────────────────────────────
-// SSE stream for AI summaries
-router.get('/files/:id/summary', async (req, res) => {
-  const { id } = req.params;
-
-  // Set headers for SSE
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.flushHeaders();
-
-  try {
-    const { data: file, error } = await supabase
-      .from('files')
-      .select('summary')
-      .eq('id', id)
-      .single();
-
-    if (error || !file) {
-      res.write(`data: ${JSON.stringify('Summary not found.')}\n\n`);
-      return res.end();
-    }
-
-    const summary = file.summary || 'Analysis pending...';
-    
-    // Simulate streaming for better UI effect
-    const words = summary.split(' ');
-    for (const word of words) {
-      res.write(`data: ${word} \n\n`);
-      await new Promise(r => setTimeout(r, 40)); // small delay
-    }
-    
-    res.write('event: end\ndata: \n\n');
-    res.end();
-  } catch (err) {
-    res.write(`data: Error: ${err.message}\n\n`);
-    res.end();
-  }
-});
-
-
-// ─── POST /api/repo/:id/query ─────────────────────────────────────────────────
-// Natural language search: tsvector full-text + Gemini explanation
 router.post('/repo/:id/query', async (req, res) => {
   const { question } = req.body;
-  if (!question || !question.trim()) {
-    return res.status(400).json({ error: 'question is required' });
-  }
+  const repoId = req.params.id;
 
-  // Postgres full-text search via RPC
-  const { data: searchResults, error } = await supabase.rpc('search_files', {
-    p_repo_id: req.params.id,
-    p_query: question.trim(),
-  });
+  if (!question) return res.status(400).json({ error: 'Question is required' });
 
-  if (error) {
-    console.error('[API] search_files RPC error:', error);
-    return res.status(500).json({ error: error.message });
-  }
-
-  const files = searchResults || [];
-
-  // Extract keywords from question for highlighting
-  const keywords = question.toLowerCase().split(/\W+/).filter((w) => w.length > 2);
-
-  // Get AI explanation (non-blocking if Gemini fails)
-  let explanation = `Found ${files.length} relevant file(s) for: "${question}"`;
   try {
-    if (files.length > 0) {
-      explanation = await answerQuery(question, files);
+    const { data: repo, error: repoError } = await supabase
+      .from('repos')
+      .select('ai_context, repo_name, repo_url')
+      .eq('id', repoId)
+      .single();
+
+    if (repoError || !repo) return res.status(404).json({ error: 'Repository not found' });
+
+    const context = repo.ai_context?.summary || "No architectural context available.";
+    const result = await gemini.queryRepository(question, context);
+
+    // 3. Fetch latest commits for identified issues/keywords
+    let relatedCommits = [];
+    if (result.keywords && result.keywords.length > 0) {
+      const { data: latestCommits } = await supabase
+        .from('commits')
+        .select('message, author, authored_at, commit_hash, issue_refs')
+        .eq('repo_id', repoId)
+        .order('authored_at', { ascending: false })
+        .limit(15);
+
+      relatedCommits = (latestCommits || []).filter(c =>
+        (c.issue_refs || []).some(ref => result.keywords.includes(ref)) ||
+        result.keywords.some(kw => c.message.toLowerCase().includes(kw.toLowerCase()))
+      ).slice(0, 5);
     }
+
+    let fileResults = [];
+    if (result.files && result.files.length > 0) {
+      const { data: dbFiles } = await supabase
+        .from('files')
+        .select('id, file_path, language, summary, importance')
+        .eq('repo_id', repoId)
+        .in('file_path', result.files);
+
+      fileResults = dbFiles || [];
+    }
+
+    return res.json({
+      explanation: result.explanation,
+      files: fileResults,
+      keywords: result.keywords,
+      related_commits: relatedCommits
+    });
+
   } catch (err) {
-    console.warn('[API] Gemini query enhancement failed:', err.message);
+    logger.error('AI query failure:', err);
+    return res.status(500).json({ error: 'Internal AI query failure' });
   }
-
-  return res.json({
-    nodes: files.map((f) => f.id),
-    files: files.map((f) => ({ id: f.id, file_path: f.file_path, rank: f.rank, summary: f.summary })),
-    explanation,
-    keywords,
-  });
 });
 
-// ─── GET /api/repo/:id/onboarding-path ────────────────────────────────────────
-// Returns ordered list of up to 20 files a new developer should read first
-router.get('/repo/:id/onboarding-path', async (req, res) => {
-  const { data: repo, error } = await supabase
-    .from('repos')
-    .select('onboarding_path')
-    .eq('id', req.params.id)
-    .single();
-
-  if (error || !repo) return res.status(404).json({ error: 'Repo not found' });
-
-  return res.json({ onboarding_path: repo.onboarding_path || [] });
-});
-
-// ─── GET /api/repo/:id/branches ───────────────────────────────────────────────
-// Returns all branches of the analyzed repo with their metadata
 router.get('/repo/:id/branches', async (req, res) => {
-  const { data: repo, error } = await supabase
-    .from('repos')
-    .select('repo_url, branch')
-    .eq('id', req.params.id)
-    .single();
+  const { data: commits, error } = await supabase
+    .from('commits')
+    .select('branch')
+    .eq('repo_id', req.params.id);
 
-  if (error || !repo) return res.status(404).json({ error: 'Repo not found' });
+  if (error) return res.status(500).json({ error: error.message });
 
-  // Get all analyzed branches for this repo_url
-  const { data: analyzedBranches } = await supabase
-    .from('repos')
-    .select('id, branch, commit_sha, analyzed_files, total_files, created_at')
-    .eq('repo_url', repo.repo_url)
-    .order('created_at', { ascending: false });
-
-  // Categorize branches
-  const categorized = categorizeBranches(analyzedBranches || [], repo.branch);
-
-  return res.json({
-    current_branch: repo.branch,
-    branches: categorized,
-  });
+  const uniqueBranches = [...new Set((commits || []).map(c => c.branch))].filter(Boolean);
+  return res.json(uniqueBranches);
 });
 
-// ─── GET /api/repo/:repoUrl/available-branches ───────────────────────────────
-// Returns GitHub branches via GitHub API (for branch selector dropdown)
-router.get('/branches', async (req, res) => {
-  const { repo_url } = req.query;
-  if (!repo_url) return res.status(400).json({ error: 'repo_url is required' });
+router.get('/repo/:id/stats/issues', async (req, res) => {
+  const repoId = req.params.id;
 
   try {
-    const parsed = new URL(repo_url);
-    const [, owner, repoName] = parsed.pathname.split('/');
-    if (!owner || !repoName) throw new Error('Invalid GitHub URL');
+    // 1. Fetch commit-based issues
+    const { data: commits } = await supabase
+      .from('commits')
+      .select('issue_refs, message, author, authored_at, commit_hash')
+      .eq('repo_id', repoId);
 
-    const headers = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'RAN-Backend/1.0' };
-    if (process.env.GITHUB_TOKEN) {
-      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
+    // 2. Fetch AI themes and top files
+    const { data: repo } = await supabase.from('repos').select('ai_context').eq('id', repoId).single();
+    const { data: files } = await supabase
+      .from('files')
+      .select('file_path, importance, is_entry_point')
+      .eq('repo_id', repoId)
+      .order('importance', { ascending: false })
+      .limit(15);
 
-    const ghRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repoName}/branches?per_page=100`,
-      { headers }
-    );
+    const issueStats = {};
 
-    if (!ghRes.ok) throw new Error(`GitHub API error: ${ghRes.status}`);
+    // A. Process commits (Direct matches)
+    (commits || []).forEach(commit => {
+      (commit.issue_refs || []).forEach(ref => {
+        if (!issueStats[ref]) {
+          issueStats[ref] = { issue: ref, count: 0, latest_commit: null, type: 'issue' };
+        }
+        issueStats[ref].count++;
 
-    const branches = await ghRes.json();
-    const categorized = categorizeBranches(
-      branches.map((b) => ({ branch: b.name, commit_sha: b.commit?.sha })),
-      'main'
-    );
+        const commitDate = new Date(commit.authored_at);
+        if (!issueStats[ref].latest_commit || commitDate > new Date(issueStats[ref].latest_commit.authored_at)) {
+          issueStats[ref].latest_commit = {
+            hash: commit.commit_hash,
+            message: commit.message,
+            author: commit.author,
+            authored_at: commit.authored_at
+          };
+        }
+      });
+    });
 
-    return res.json({ branches: categorized });
+    // B. Inject AI Themes if data is sparse
+    const aiThemes = repo?.ai_context?.issues || [];
+    aiThemes.forEach(theme => {
+      const key = `[AI] ${theme}`;
+      if (!issueStats[key]) {
+        issueStats[key] = {
+          issue: theme,
+          count: 10, // AI themes are highly important
+          type: 'theme'
+        };
+      }
+    });
+
+    // C. Inject Top Files as "Activity Centers"
+    (files || []).forEach(f => {
+      const fileName = path.basename(f.file_path);
+      const key = fileName;
+      if (!issueStats[key] && f.importance > 10) {
+        issueStats[key] = {
+          issue: fileName,
+          count: f.importance,
+          type: 'file',
+          file_path: f.file_path
+        };
+      }
+    });
+
+    const sortedStats = Object.values(issueStats)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15);
+
+    return res.json(sortedStats);
+
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    logger.error('Failed to fetch issue stats:', err);
+    return res.status(500).json({ error: 'Failed to fetch issue statistics' });
   }
 });
 
-// ─── Helper: Categorize branches ─────────────────────────────────────────────
-function categorizeBranches(branches, currentBranch) {
-  const categorize = (name) => {
-    const n = (name || '').toLowerCase();
-    if (n === 'main' || n === 'master' || n === 'trunk') return 'production';
-    if (n.startsWith('release/') || n.startsWith('hotfix/')) return 'release';
-    if (n.startsWith('feature/') || n.startsWith('feat/')) return 'feature';
-    if (n.startsWith('fix/') || n.startsWith('bugfix/') || n.startsWith('bug/')) return 'bugfix';
-    if (n.startsWith('chore/') || n.startsWith('refactor/') || n.startsWith('ci/')) return 'maintenance';
-    if (n === 'dev' || n === 'develop' || n === 'development' || n === 'staging') return 'integration';
-    return 'other';
-  };
-
-  return (branches || []).map((b) => ({
-    ...b,
-    category: categorize(b.branch || b.name),
-    is_current: (b.branch || b.name) === currentBranch,
-  }));
-}
-
-module.exports = router;
+export default router;

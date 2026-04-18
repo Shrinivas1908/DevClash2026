@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #0D0F14;
+  --bg-surface: #13161E;
+  --bg-elevated: #1C2030;
+  --bg-hover: #252A3A;
+
+  --border: #2A2F42;
+  --border-subtle: #1E2235;
+
+  --text-primary: #E8EAEF;
+  --text-secondary: #8B91A8;
+  --text-muted: #555C78;
+
+  --accent-blue: #4D8EF7;
+  --accent-blue-dim: #1E3A6E;
+  --accent-green: #3DD68C;
+  --accent-amber: #F5A623;
+  --accent-red: #E05C5C;
+  --accent-purple: #9B7FED;
+
+  --graph-node-default: #1C2030;
+  --graph-node-central: #1E3A6E;
+  --graph-node-entry: #1A3A2A;
+  --graph-edge: #2A2F42;
+  --graph-edge-highlight: #4D8EF7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* React Flow overrides */
+.react-flow__attribution {
+  font-size: 10px;
+  opacity: 0.4;
+}
+
+.react-flow__background {
+  background-color: var(--bg-base) !important;
+}
+
+.react-flow__minimap {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.react-flow__controls {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text-secondary) !important;
+  fill: var(--text-secondary) !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: var(--bg-hover) !important;
+}
+
+/* Custom animations */
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(77, 142, 247, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(77, 142, 247, 0.25); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* Dashed edge animation */
+@keyframes dashFlow {
+  to { stroke-dashoffset: -20; }
+}

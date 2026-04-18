@@ -14,6 +14,7 @@ import { ArchGraph } from '@/components/graph/ArchGraph';
 import { JobProgress } from '@/components/ingestion/JobProgress';
 import { StatsContainer } from '@/components/analytics/StatsContainer';
 import { Button } from '@/components/ui/Button';
+import { apiGet } from '@/lib/api';
 import { IS_MOCK_MODE, MOCK_JOB } from '@/lib/mockData';
 
 export function GraphPage() {
@@ -28,12 +29,24 @@ export function GraphPage() {
   const setIsOffline = useStore((s) => s.setIsOffline);
   const currentView = useStore((s) => s.currentView);
 
-  // Load mock job if in demo mode
+  // Load or recover job
   useEffect(() => {
     if (IS_MOCK_MODE && !currentJob) {
       setJob(MOCK_JOB);
+      return;
     }
-  }, [IS_MOCK_MODE, currentJob, setJob]);
+
+    if (jobId && !currentJob && !IS_MOCK_MODE) {
+      console.log(`[GraphPage] Recovering job status for ${jobId}...`);
+      apiGet(`/api/jobs/${jobId}`)
+        .then((data) => {
+          setJob(data as any);
+        })
+        .catch((err) => {
+          console.error('[GraphPage] Failed to recover job:', err);
+        });
+    }
+  }, [jobId, currentJob, setJob]);
 
   // Realtime subscription
   useJobRealtime(jobId);

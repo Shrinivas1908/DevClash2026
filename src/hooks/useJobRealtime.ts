@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '@/store';
-import type { Job, PipelineStage } from '@/types/job';
+import type { Job, PipelineStage, PipelineStageNumber } from '@/types/job';
 import { IS_MOCK_MODE } from '@/lib/mockData';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
@@ -50,8 +50,8 @@ export function useJobRealtime(jobId: string) {
 
           // Reconstruct the stages array
           const stages: PipelineStage[] = [1, 2, 3, 4].map((stageNum) => ({
-            stage: stageNum,
-            name: ['Repo Ingestion', 'Static Analysis', 'Commit Analysis', 'AI Summaries'][stageNum - 1],
+            stage: stageNum as PipelineStageNumber,
+            name: (['Repo Ingestion', 'Static Analysis', 'Commit Analysis', 'AI Summaries'] as string[])[stageNum - 1],
             status:
               data.stage > stageNum
                 ? 'complete'
@@ -66,11 +66,13 @@ export function useJobRealtime(jobId: string) {
 
           updateJob({
             id: data.id,
+            repo_url: data.repo_url,
             status: (statusMap[data.status] || data.status) as any,
             stages,
             progress: data.progress,
             error_message: data.error_message,
             updated_at: data.updated_at,
+            created_at: data.created_at,
           } as Partial<Job> as Job);
 
           if (data.status === 'done' || data.status === 'error') {

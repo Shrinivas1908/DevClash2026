@@ -30,7 +30,7 @@ export function StatsContainer() {
     return () => clearTimeout(timer);
   }, [repoId]);
 
-  const { data: job, isLoading: jobLoading } = useQuery({
+  const { data: job, isLoading: _jobLoading } = useQuery({
     queryKey: ['job-detail', debouncedRepoId],
     queryFn: () => apiGet<any>(`/api/jobs/${debouncedRepoId}`),
     enabled: !!debouncedRepoId,
@@ -38,7 +38,7 @@ export function StatsContainer() {
 
   const realRepoId = job?.repo_id || null;
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: _statsLoading } = useQuery({
     queryKey: ['issue-stats-full', realRepoId],
     queryFn: () => apiGet<IssueStat[]>(`/api/repo/${realRepoId}/stats/issues`),
     enabled: !!realRepoId,

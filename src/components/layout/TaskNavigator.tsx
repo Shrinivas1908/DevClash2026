@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Target, Search, FileCode, ChevronRight } from 'lucide-react';
+import { Target, Search, FileCode, } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
 import { IS_MOCK_MODE, MOCK_TASK_MAP, MOCK_FILES } from '@/lib/mockData';
 import { Badge, importanceBadge } from '@/components/ui/Badge';
 
 export function TaskNavigator() {
-  const currentJob = useStore((s) => s.currentJob);
+  const _currentJob = useStore((s) => s.currentJob);
   const userTask = useStore((s) => s.userTask);
   const setUserTask = useStore((s) => s.setUserTask);
   const setSelectedNode = useStore((s) => s.setSelectedNode);

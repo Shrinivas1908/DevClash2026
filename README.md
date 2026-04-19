@@ -74,3 +74,4 @@ export default defineConfig([
 
 # DevClash2026
 Team Quardforge
+2025-26

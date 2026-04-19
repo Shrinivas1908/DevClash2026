@@ -84,7 +84,7 @@ export function useJobRealtime(jobId: string) {
           console.error('[useJobRealtime] Error parsing SSE message:', err);
         }
       };
-
+//hi
       es.onerror = (err) => {
         console.warn('[useJobRealtime] SSE Error:', err);
         setIsLiveConnected(false);

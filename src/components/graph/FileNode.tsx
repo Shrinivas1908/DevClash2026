@@ -6,14 +6,14 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import type { FileNodeData } from '@/types/graph';
 import { cn } from '@/lib/utils';
 
-function getBorderColor(data: FileNodeData, isSelected: boolean): string {
+function _getBorderColor(data: FileNodeData, isSelected: boolean): string {
   if (isSelected) return 'border-accent-blue shadow-glow';
   if (data.composite_importance >= 20) return 'border-accent-blue/50';
   if (data.is_entry_point) return 'border-accent-green/50';
   return 'border-border';
 }
 
-function getNodeBg(data: FileNodeData): string {
+function _getNodeBg(data: FileNodeData): string {
   if (data.composite_importance >= 20) return 'bg-graph-node-central';
   if (data.is_entry_point) return 'bg-graph-node-entry';
   return 'bg-graph-node-default';
@@ -23,7 +23,7 @@ export const FileNode = memo(({ data, selected }: NodeProps) => {
   const fileData = data as unknown as FileNodeData;
   const compactMode = useStore((s) => s.compactMode);
 
-  const importanceColor = fileData.composite_importance >= 20
+  const _importanceColor = fileData.composite_importance >= 20
     ? 'text-accent-blue'
     : fileData.is_entry_point
       ? 'text-accent-green'

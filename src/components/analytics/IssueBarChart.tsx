@@ -107,7 +107,7 @@ export function IssueBarChart({ data }: { data: ChartData[] }) {
               }}
               itemStyle={{ color: '#E2E8F0', fontWeight: 'bold' }}
               labelStyle={{ color: '#3B82F6', marginBottom: '6px', fontWeight: '900', letterSpacing: '0.05em' }}
-              formatter={(value: number) => [`${value} Activity Units`, 'Density']}
+              formatter={(value: number | undefined) => [string, string]}
             />
             <Bar
               dataKey="count"
@@ -116,7 +116,7 @@ export function IssueBarChart({ data }: { data: ChartData[] }) {
               animationDuration={1500}
               animationBegin={200}
             >
-              {data.map((entry, index) => (
+              {data.map((_entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={index % 2 === 0 ? 'url(#barGradientBlue)' : 'url(#barGradientPurple)'}
